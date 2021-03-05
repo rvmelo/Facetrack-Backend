@@ -4,6 +4,10 @@ import passport from 'passport';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
+import FindUserService from '../services/findUserService';
+
+let user = {};
+
 passport.use(
   new FacebookStrategy(
     {
@@ -12,8 +16,19 @@ passport.use(
       callbackURL: `${process.env.BASE_URL}/users/auth/facebook/callback`,
     },
 
-    function authLogin(accessToken, refreshToken, profile, done) {
-      console.log('profile: ', profile);
+    async (accessToken, refreshToken, profile, done) => {
+      const findUserService = new FindUserService();
+
+      const { id } = profile;
+
+      const userData = await findUserService.execute({
+        id,
+      });
+
+      user = userData
+        ? { userData, accessToken }
+        : { profile_id: id, accessToken };
+
       return done(null, profile);
     },
   ),
@@ -26,8 +41,19 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       callbackURL: `${process.env.BASE_URL}/users/auth/google/callback`,
     },
-    function authLogin(accessToken, refreshToken, profile, done) {
-      console.log('profile: ', profile);
+    async (accessToken, refreshToken, profile, done) => {
+      const findUserService = new FindUserService();
+
+      const { id } = profile;
+
+      const userData = await findUserService.execute({
+        id,
+      });
+
+      user = userData
+        ? { userData, accessToken }
+        : { profile_id: id, accessToken };
+
       return done('', profile);
     },
   ),
@@ -36,11 +62,12 @@ passport.use(
 const userRoutes = Router();
 
 userRoutes.get('/auth/facebook', passport.authenticate('facebook'));
+
 userRoutes.get(
   '/auth/facebook/callback',
   passport.authenticate('facebook'),
   (req, res) => {
-    res.redirect('/');
+    res.status(201).json({ user });
   },
 );
 
@@ -51,9 +78,9 @@ userRoutes.get(
 
 userRoutes.get(
   '/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    res.redirect('/');
+    res.status(201).json({ user });
   },
 );
 

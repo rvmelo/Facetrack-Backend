@@ -1,4 +1,7 @@
 import 'dotenv/config';
+import 'reflect-metadata';
+import './database';
+
 import express from 'express';
 import passport from 'passport';
 import cors from 'cors';

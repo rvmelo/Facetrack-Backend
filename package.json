@@ -11,14 +11,18 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "mongodb": "^3.6.4",
     "passport": "^0.4.1",
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
-    "passport-instagram": "^1.0.0"
+    "passport-instagram": "^1.0.0",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.2.31"
   },
   "devDependencies": {
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
+    "@types/mongodb": "^3.6.8",
     "@types/passport-facebook": "^2.1.10",
     "@types/passport-google-oauth20": "^2.0.6",
     "@types/passport-instagram": "^1.0.1",
