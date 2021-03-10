@@ -4,9 +4,16 @@ import passport from 'passport';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
+import User from '../models/User';
+
 import FindUserService from '../services/findUserService';
 
-let user = {};
+interface UserAuthData {
+  user: User | undefined;
+  token: string;
+}
+
+let userData = {} as UserAuthData;
 
 passport.use(
   new FacebookStrategy(
@@ -21,13 +28,9 @@ passport.use(
 
       const { id } = profile;
 
-      const userData = await findUserService.execute({
+      userData = await findUserService.execute({
         id,
       });
-
-      user = userData
-        ? { userData, accessToken }
-        : { profile_id: id, accessToken };
 
       return done(null, profile);
     },
@@ -46,13 +49,9 @@ passport.use(
 
       const { id } = profile;
 
-      const userData = await findUserService.execute({
+      userData = await findUserService.execute({
         id,
       });
-
-      user = userData
-        ? { userData, accessToken }
-        : { profile_id: id, accessToken };
 
       return done('', profile);
     },
@@ -67,7 +66,9 @@ userRoutes.get(
   '/auth/facebook/callback',
   passport.authenticate('facebook'),
   (req, res) => {
-    res.status(201).json({ user });
+    res.redirect(
+      `${process.env.EXPO_CLIENT_URL}?token=${userData.token}}&user=${userData.user}`,
+    );
   },
 );
 
@@ -80,7 +81,9 @@ userRoutes.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    res.status(201).json({ user });
+    res.redirect(
+      `${process.env.EXPO_CLIENT_URL}?token=${userData.token}&user=${userData.user}`,
+    );
   },
 );
 
