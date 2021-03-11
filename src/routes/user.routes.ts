@@ -67,7 +67,7 @@ userRoutes.get(
   passport.authenticate('facebook'),
   (req, res) => {
     res.redirect(
-      `${process.env.EXPO_CLIENT_URL}?token=${userData.token}}&user=${userData.user}`,
+      `${process.env.EXPO_CLIENT_URL}?userData=${JSON.stringify(userData)}`,
     );
   },
 );
@@ -82,7 +82,7 @@ userRoutes.get(
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     res.redirect(
-      `${process.env.EXPO_CLIENT_URL}?token=${userData.token}&user=${userData.user}`,
+      `${process.env.EXPO_CLIENT_URL}?userData=${JSON.stringify(userData)}`,
     );
   },
 );
