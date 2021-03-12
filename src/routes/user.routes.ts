@@ -9,7 +9,11 @@ import User from '../models/User';
 import FindUserService from '../services/findUserService';
 
 interface UserAuthData {
-  user: User | undefined;
+  registeredUser?: User | undefined;
+  notRegisteredUser?: {
+    id: string;
+    displayName: string;
+  };
   token: string;
 }
 
@@ -26,10 +30,11 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       const findUserService = new FindUserService();
 
-      const { id } = profile;
+      const { id, displayName } = profile;
 
       userData = await findUserService.execute({
         id,
+        displayName,
       });
 
       return done(null, profile);
@@ -47,10 +52,11 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       const findUserService = new FindUserService();
 
-      const { id } = profile;
+      const { id, displayName } = profile;
 
       userData = await findUserService.execute({
         id,
+        displayName,
       });
 
       return done('', profile);

@@ -5,10 +5,15 @@ import User from '../models/User';
 
 interface IRequest {
   id: string;
+  displayName: string;
 }
 
 interface IResponse {
-  user: User | undefined;
+  registeredUser?: User | undefined;
+  notRegisteredUser?: {
+    id: string;
+    displayName: string;
+  };
   token: string;
 }
 
@@ -19,7 +24,7 @@ class FindUserService {
     this.ormRepository = getMongoRepository(User, 'mongo');
   }
 
-  public async execute({ id }: IRequest): Promise<IResponse> {
+  public async execute({ id, displayName }: IRequest): Promise<IResponse> {
     const foundUser = await this.ormRepository.findOne({
       where: { user_id: id },
     });
@@ -31,7 +36,9 @@ class FindUserService {
       expiresIn,
     });
 
-    return { user: foundUser, token };
+    return foundUser
+      ? { registeredUser: foundUser, token }
+      : { notRegisteredUser: { id, displayName }, token };
   }
 }
 
