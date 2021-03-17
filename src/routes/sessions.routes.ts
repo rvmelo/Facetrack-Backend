@@ -8,7 +8,7 @@ import User from '../models/User';
 
 import FindUserService from '../services/findUserService';
 
-interface UserAuthData {
+interface AuthData {
   registeredUser?: User | undefined;
   notRegisteredUser?: {
     id: string;
@@ -17,14 +17,14 @@ interface UserAuthData {
   token: string;
 }
 
-let userData = {} as UserAuthData;
+let userData = {} as AuthData;
 
 passport.use(
   new FacebookStrategy(
     {
       clientID: process.env.FACEBOOK_CLIENT_ID || '',
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
-      callbackURL: `${process.env.BASE_URL}/users/auth/facebook/callback`,
+      callbackURL: `${process.env.BASE_URL}/sessions/auth/facebook/callback`,
     },
 
     async (accessToken, refreshToken, profile, done) => {
@@ -47,7 +47,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      callbackURL: `${process.env.BASE_URL}/users/auth/google/callback`,
+      callbackURL: `${process.env.BASE_URL}/sessions/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       const findUserService = new FindUserService();
@@ -64,33 +64,33 @@ passport.use(
   ),
 );
 
-const userRoutes = Router();
+const sessionRoutes = Router();
 
-userRoutes.get('/auth/facebook', passport.authenticate('facebook'));
+sessionRoutes.get('/auth/facebook', passport.authenticate('facebook'));
 
-userRoutes.get(
+sessionRoutes.get(
   '/auth/facebook/callback',
   passport.authenticate('facebook'),
   (req, res) => {
     res.redirect(
-      `${process.env.EXPO_CLIENT_URL}?userData=${JSON.stringify(userData)}`,
+      `${process.env.EXPO_CLIENT_URL}?authData=${JSON.stringify(userData)}`,
     );
   },
 );
 
-userRoutes.get(
+sessionRoutes.get(
   '/auth/google',
   passport.authenticate('google', { scope: ['profile'] }),
 );
 
-userRoutes.get(
+sessionRoutes.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     res.redirect(
-      `${process.env.EXPO_CLIENT_URL}?userData=${JSON.stringify(userData)}`,
+      `${process.env.EXPO_CLIENT_URL}?authData=${JSON.stringify(userData)}`,
     );
   },
 );
 
-export default userRoutes;
+export default sessionRoutes;
