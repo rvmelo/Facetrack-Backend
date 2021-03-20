@@ -4,15 +4,14 @@ import passport from 'passport';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
-import User from '../models/User';
-
 import FindUserService from '../services/findUserService';
+import GenerateUserToken from '../services/generateUserToken';
+import GetUserInstagramDataService from '../services/getUserInstagramDataService';
 
 interface AuthData {
-  registeredUser?: User | undefined;
   notRegisteredUser?: {
-    id: string;
-    displayName: string;
+    userProviderId: string;
+    name: string;
   };
   token: string;
 }
@@ -29,13 +28,22 @@ passport.use(
 
     async (accessToken, refreshToken, profile, done) => {
       const findUserService = new FindUserService();
+      const generateUserToken = new GenerateUserToken();
 
       const { id, displayName } = profile;
 
-      userData = await findUserService.execute({
-        id,
-        displayName,
+      const token = await generateUserToken.execute({ userProviderId: id });
+
+      const foundUser = await findUserService.execute({
+        userProviderId: id,
       });
+
+      userData = foundUser
+        ? { token }
+        : {
+            notRegisteredUser: { userProviderId: id, name: displayName },
+            token,
+          };
 
       return done(null, profile);
     },
@@ -51,13 +59,22 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       const findUserService = new FindUserService();
+      const generateUserToken = new GenerateUserToken();
 
       const { id, displayName } = profile;
 
-      userData = await findUserService.execute({
-        id,
-        displayName,
+      const token = await generateUserToken.execute({ userProviderId: id });
+
+      const foundUser = await findUserService.execute({
+        userProviderId: id,
       });
+
+      userData = foundUser
+        ? { token }
+        : {
+            notRegisteredUser: { userProviderId: id, name: displayName },
+            token,
+          };
 
       return done('', profile);
     },
@@ -92,5 +109,23 @@ sessionRoutes.get(
     );
   },
 );
+
+sessionRoutes.get('/auth/instagram/callback', async (req, res) => {
+  const { code } = req.query;
+
+  res.redirect(`${process.env.EXPO_CLIENT_URL}?code=${code}`);
+});
+
+sessionRoutes.get('/auth/instagram/profile', async (req, res) => {
+  const { code } = req.query;
+
+  const getUserInstagramDataService = new GetUserInstagramDataService();
+
+  const instagramData = await getUserInstagramDataService.execute({
+    authCode: typeof code === 'string' ? code : '',
+  });
+
+  res.status(200).json(instagramData);
+});
 
 export default sessionRoutes;

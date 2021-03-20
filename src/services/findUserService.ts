@@ -1,20 +1,8 @@
 import { getMongoRepository, MongoRepository } from 'typeorm';
-import { sign } from 'jsonwebtoken';
-import authConfig from '../config/auth';
 import User from '../models/User';
 
 interface IRequest {
-  id: string;
-  displayName: string;
-}
-
-interface IResponse {
-  registeredUser?: User | undefined;
-  notRegisteredUser?: {
-    id: string;
-    displayName: string;
-  };
-  token: string;
+  userProviderId: string;
 }
 
 class FindUserService {
@@ -24,21 +12,14 @@ class FindUserService {
     this.ormRepository = getMongoRepository(User, 'mongo');
   }
 
-  public async execute({ id, displayName }: IRequest): Promise<IResponse> {
+  public async execute({
+    userProviderId,
+  }: IRequest): Promise<User | undefined> {
     const foundUser = await this.ormRepository.findOne({
-      where: { user_id: id },
+      where: { userProviderId },
     });
 
-    const { secret, expiresIn } = authConfig.jwt;
-
-    const token = sign({}, secret, {
-      subject: id,
-      expiresIn,
-    });
-
-    return foundUser
-      ? { registeredUser: foundUser, token }
-      : { notRegisteredUser: { id, displayName }, token };
+    return foundUser;
   }
 }
 

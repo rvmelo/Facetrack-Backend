@@ -8,16 +8,47 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 
+interface UserMedia {
+  id: string;
+  caption: string;
+  media_url: string;
+}
+
+interface InstagramData {
+  userName: string;
+  userMedia: UserMedia[];
+}
+
 @Entity('users')
 class User {
   @ObjectIdColumn()
   id: ObjectID;
 
   @PrimaryColumn()
-  user_id: string;
+  userProviderId: string;
 
   @Column()
   name: string;
+
+  @Column()
+  birthDate: string;
+
+  @Column()
+  sex: 'male' | 'female' | undefined;
+
+  @Column()
+  relationshipStatus: 'single' | 'serious relationship' | 'married' | undefined;
+
+  @Column()
+  sexualOrientation:
+    | 'heterosexual'
+    | 'homosexual'
+    | 'bisexual'
+    | 'asexual'
+    | undefined;
+
+  @Column()
+  instagram: InstagramData;
 
   @CreateDateColumn()
   created_at: Date;
