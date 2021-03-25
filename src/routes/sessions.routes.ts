@@ -76,23 +76,24 @@ passport.use(
             token,
           };
 
-      return done('', profile);
+      return done(null, profile);
     },
   ),
 );
 
 const sessionRoutes = Router();
 
+sessionRoutes.get('/auth/success', (req, res) => {
+  res.json(userData);
+});
+
 sessionRoutes.get('/auth/facebook', passport.authenticate('facebook'));
 
 sessionRoutes.get(
   '/auth/facebook/callback',
-  passport.authenticate('facebook'),
-  (req, res) => {
-    res.redirect(
-      `${process.env.EXPO_CLIENT_URL}?authData=${JSON.stringify(userData)}`,
-    );
-  },
+  passport.authenticate('facebook', {
+    successRedirect: process.env.EXPO_CLIENT_URL,
+  }),
 );
 
 sessionRoutes.get(
@@ -102,12 +103,9 @@ sessionRoutes.get(
 
 sessionRoutes.get(
   '/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect(
-      `${process.env.EXPO_CLIENT_URL}?authData=${JSON.stringify(userData)}`,
-    );
-  },
+  passport.authenticate('google', {
+    successRedirect: process.env.EXPO_CLIENT_URL,
+  }),
 );
 
 sessionRoutes.get('/auth/instagram/callback', async (req, res) => {
