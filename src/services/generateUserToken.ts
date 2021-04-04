@@ -21,7 +21,7 @@ class GenerateUserToken {
 
     const { secret, secretForNonRegisteredUsers, expiresIn } = authConfig.jwt;
 
-    if (!foundUser) {
+    if (foundUser) {
       const token = sign({}, secret, {
         subject: userProviderId,
         expiresIn,

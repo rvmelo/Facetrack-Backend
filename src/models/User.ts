@@ -31,7 +31,7 @@ class User {
   name: string;
 
   @Column()
-  birthDate: string;
+  birthDate: Date;
 
   @Column()
   sex: 'male' | 'female' | undefined;

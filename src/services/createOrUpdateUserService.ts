@@ -1,4 +1,7 @@
 import { getMongoRepository, MongoRepository } from 'typeorm';
+import { isValid, differenceInYears, endOfDay } from 'date-fns';
+
+import AppError from '../errors/appError';
 import User from '../models/User';
 
 interface IRequest {
@@ -13,6 +16,18 @@ class CreateOrUpdateUserService {
   }
 
   public async execute({ user }: IRequest): Promise<User> {
+    const { birthDate } = user;
+
+    const currentDate = endOfDay(new Date());
+
+    if (!isValid(birthDate)) {
+      throw new AppError('Invalid date');
+    }
+
+    if (differenceInYears(currentDate, birthDate) < 18) {
+      throw new AppError('User is under age');
+    }
+
     const foundUser = await this.ormRepository.findOne({
       where: {
         userProviderId: user.userProviderId,
