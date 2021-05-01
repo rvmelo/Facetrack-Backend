@@ -4,17 +4,26 @@ import passport from 'passport';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
+import User from '../models/User';
+
 import FindUserService from '../services/findUserService';
 import GenerateUserToken from '../services/generateUserToken';
 import GetUserInstagramDataService from '../services/getUserInstagramDataService';
 
-interface AuthData {
-  notRegisteredUser?: {
+interface RegisteredUser {
+  registeredUser: User;
+  token: string;
+}
+
+interface NotRegisteredUser {
+  notRegisteredUser: {
     userProviderId: string;
     name: string;
   };
   token: string;
 }
+
+type AuthData = RegisteredUser | NotRegisteredUser;
 
 let userData = {} as AuthData;
 
@@ -39,7 +48,7 @@ passport.use(
       });
 
       userData = foundUser
-        ? { token }
+        ? { registeredUser: foundUser, token }
         : {
             notRegisteredUser: { userProviderId: id, name: displayName },
             token,
@@ -70,7 +79,7 @@ passport.use(
       });
 
       userData = foundUser
-        ? { token }
+        ? { registeredUser: foundUser, token }
         : {
             notRegisteredUser: { userProviderId: id, name: displayName },
             token,
