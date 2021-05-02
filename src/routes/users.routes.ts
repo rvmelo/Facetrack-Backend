@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { celebrate, Segments, Joi } from 'celebrate';
 
-import CreateOrUpdateUserService from '../services/createOrUpdateUserService';
-import FindUserService from '../services/findUserService';
+import CreateUserService from '../services/createUserService';
+import GenerateUserToken from '../services/generateUserToken';
 
 import ensureSignUp from '../middlewares/ensureSignUp';
 
@@ -38,22 +38,16 @@ userRoutes.post(
   async (req, res) => {
     const user = req.body;
 
-    const createOrUpdateUserService = new CreateOrUpdateUserService();
+    const createUserService = new CreateUserService();
+    const generateUserToken = new GenerateUserToken();
 
-    const savedUser = await createOrUpdateUserService.execute({ user });
+    const savedUser = await createUserService.execute({ user });
+    const token = await generateUserToken.execute({
+      userProviderId: savedUser.userProviderId,
+    });
 
-    return res.status(200).json(savedUser);
+    return res.status(200).json({ user: savedUser, token });
   },
 );
-
-userRoutes.get('/:id', async (req, res) => {
-  const { id } = req.params;
-
-  const findUserService = new FindUserService();
-
-  const userData = await findUserService.execute({ userProviderId: id });
-
-  return res.status(200).json(userData);
-});
 
 export default userRoutes;

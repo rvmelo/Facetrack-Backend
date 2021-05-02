@@ -8,7 +8,7 @@ interface IRequest {
   user: User;
 }
 
-class CreateOrUpdateUserService {
+class CreateUserService {
   private ormRepository: MongoRepository<User>;
 
   constructor() {
@@ -34,16 +34,12 @@ class CreateOrUpdateUserService {
       },
     });
 
-    if (!foundUser) {
-      const createdUser = this.ormRepository.create(user);
-      await this.ormRepository.save(createdUser);
-      return createdUser;
-    }
+    if (foundUser) throw new AppError('User already exists');
 
-    const updatedUser = await this.ormRepository.save(foundUser);
-
-    return updatedUser;
+    const createdUser = this.ormRepository.create(user);
+    await this.ormRepository.save(createdUser);
+    return createdUser;
   }
 }
 
-export default CreateOrUpdateUserService;
+export default CreateUserService;
