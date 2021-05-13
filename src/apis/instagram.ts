@@ -45,7 +45,7 @@ export const get_user_media = async (
 ): Promise<UserMedia[]> => {
   try {
     const response = await axios.get(
-      `https://graph.instagram.com/me/media?fields=id,caption,media_url&access_token=${userToken}`,
+      `https://graph.instagram.com/me/media?fields=id,caption,media_url,media_type,timestamp&access_token=${userToken}`,
     );
 
     return [...response.data.data];

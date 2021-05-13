@@ -12,6 +12,8 @@ const mediaSchema = Joi.object().keys({
   id: Joi.string().trim().required(),
   caption: Joi.string().trim(),
   media_url: Joi.string().trim().uri().required(),
+  media_type: Joi.string().trim().required(),
+  timestamp: Joi.string().trim().required(),
 });
 
 userRoutes.post(
