@@ -1,12 +1,19 @@
 import { Router } from 'express';
 import { celebrate, Segments, Joi } from 'celebrate';
 
+import multer from 'multer';
+
 import CreateUserService from '../services/createUserService';
 import GenerateUserToken from '../services/generateUserToken';
 
 import ensureSignUp from '../middlewares/ensureSignUp';
+import ensureAuthenticated from '../middlewares/ensureAuthenticated';
+
+import uploadConfig from '../config/upload';
+import UpdateUserAvatarService from '../services/updateUserAvatarService';
 
 const userRoutes = Router();
+const upload = multer(uploadConfig);
 
 const mediaSchema = Joi.object().keys({
   id: Joi.string().trim().required(),
@@ -23,6 +30,7 @@ userRoutes.post(
     [Segments.BODY]: {
       userProviderId: Joi.string().required(),
       name: Joi.string().trim().min(3).required(),
+      avatar: Joi.string().trim(),
       birthDate: Joi.date().required(),
       sex: Joi.string().valid('male', 'female').required(),
       relationshipStatus: Joi.string()
@@ -49,6 +57,22 @@ userRoutes.post(
     });
 
     return res.status(200).json({ user: savedUser, token });
+  },
+);
+
+userRoutes.patch(
+  '/avatar',
+  ensureAuthenticated,
+  upload.single('avatar'),
+  async (req, res) => {
+    const updateAvatarService = new UpdateUserAvatarService();
+
+    const user = await updateAvatarService.execute({
+      userProviderId: req.user.id,
+      avatarFilename: req.file.filename,
+    });
+
+    return res.json(user);
   },
 );
 
