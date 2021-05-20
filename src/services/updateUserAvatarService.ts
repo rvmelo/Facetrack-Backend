@@ -1,4 +1,5 @@
 import { getMongoRepository, MongoRepository } from 'typeorm';
+import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 
@@ -9,7 +10,7 @@ import uploadConfig from '../config/upload';
 
 interface Request {
   userProviderId: string;
-  avatarFilename: string;
+  avatarFileName: string;
 }
 
 class UpdateUserAvatarService {
@@ -21,7 +22,7 @@ class UpdateUserAvatarService {
 
   public async execute({
     userProviderId,
-    avatarFilename,
+    avatarFileName,
   }: Request): Promise<User> {
     const user = await this.ormRepository.findOne({
       where: {
@@ -41,7 +42,22 @@ class UpdateUserAvatarService {
       }
     }
 
-    user.avatar = avatarFilename;
+    const avatarPath = path.join(
+      __dirname,
+      '..',
+      '..',
+      `tmp/${avatarFileName}`,
+    );
+
+    const resizedFile = `resized-${avatarFileName}`;
+
+    await sharp(avatarPath)
+      .resize({ width: 640, height: 640 })
+      .toFile(path.join(__dirname, '..', '..', `tmp/${resizedFile}`));
+
+    await fs.promises.unlink(avatarPath);
+
+    user.avatar = resizedFile;
     await this.ormRepository.save(user);
 
     return user;

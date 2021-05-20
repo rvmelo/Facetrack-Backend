@@ -24,6 +24,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-instagram": "^1.0.0",
     "reflect-metadata": "^0.1.13",
+    "sharp": "^0.28.2",
     "typeorm": "^0.2.31"
   },
   "devDependencies": {
@@ -35,6 +36,7 @@
     "@types/passport-facebook": "^2.1.10",
     "@types/passport-google-oauth20": "^2.0.6",
     "@types/passport-instagram": "^1.0.1",
+    "@types/sharp": "^0.28.1",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
     "@typescript-eslint/parser": "^4.15.2",
     "eslint": "6.8.0",

@@ -69,7 +69,7 @@ userRoutes.patch(
 
     const user = await updateAvatarService.execute({
       userProviderId: req.user.id,
-      avatarFilename: req.file.filename,
+      avatarFileName: req.file.filename,
     });
 
     return res.json(user);
