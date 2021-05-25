@@ -8,6 +8,8 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 
+import { Exclude } from 'class-transformer';
+
 interface UserMedia {
   id: string;
   caption: string;
@@ -22,6 +24,7 @@ interface InstagramData {
 @Entity('users')
 class User {
   @ObjectIdColumn()
+  @Exclude()
   id: ObjectID;
 
   @PrimaryColumn()
@@ -54,9 +57,11 @@ class User {
   instagram: InstagramData;
 
   @CreateDateColumn()
+  @Exclude()
   created_at: Date;
 
   @UpdateDateColumn()
+  @Exclude()
   updated_at: Date;
 }
 

@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 
+import { classToClass } from 'class-transformer';
 import User from '../models/User';
 import AppError from '../errors/appError';
 
@@ -60,7 +61,7 @@ class UpdateUserAvatarService {
     user.avatar = resizedFile;
     await this.ormRepository.save(user);
 
-    return user;
+    return classToClass(user);
   }
 }
 

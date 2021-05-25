@@ -1,4 +1,5 @@
 import { getMongoRepository, MongoRepository } from 'typeorm';
+import { classToClass } from 'class-transformer';
 import User from '../models/User';
 
 interface IRequest {
@@ -19,7 +20,7 @@ class FindUserService {
       where: { userProviderId },
     });
 
-    return foundUser;
+    return classToClass(foundUser);
   }
 }
 

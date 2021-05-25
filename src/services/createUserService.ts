@@ -1,6 +1,8 @@
 import { getMongoRepository, MongoRepository } from 'typeorm';
 import { isValid, differenceInYears, endOfDay } from 'date-fns';
 
+import { classToClass } from 'class-transformer';
+
 import AppError from '../errors/appError';
 import User from '../models/User';
 
@@ -38,7 +40,7 @@ class CreateUserService {
 
     const createdUser = this.ormRepository.create(user);
     await this.ormRepository.save(createdUser);
-    return createdUser;
+    return classToClass(createdUser);
   }
 }
 
