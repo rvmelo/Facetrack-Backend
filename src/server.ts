@@ -8,6 +8,8 @@ import 'express-async-errors';
 import passport from 'passport';
 import cors from 'cors';
 
+import { rateLimiter } from './middlewares/rateLimiters';
+
 import AppError from './errors/appError';
 
 import routes from './routes';
@@ -29,6 +31,9 @@ app.use(cors());
 app.use(passport.initialize());
 app.use(express.json());
 app.use('/files', express.static(uploadConfig.directory));
+
+app.use(rateLimiter);
+
 app.use(routes);
 
 app.use(errors());

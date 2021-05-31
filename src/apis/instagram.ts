@@ -28,6 +28,36 @@ export const get_token = async (authCode: string): Promise<string> => {
   }
 };
 
+export const get_long_lived_access_token = async (
+  userToken: string,
+): Promise<string> => {
+  try {
+    const response = await axios.get(
+      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${process.env.INSTAGRAM_CLIENT_SECRET}\n&access_token=${userToken}`,
+    );
+
+    return response.data.access_token;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+export const refresh_long_lived_token = async (
+  userToken: string,
+): Promise<string> => {
+  // after refresh tokens are different
+
+  try {
+    const response = await axios.get(
+      `https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${userToken}`,
+    );
+
+    return response.data.access_token;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 export const get_username = async (userToken: string): Promise<string> => {
   try {
     const response = await axios.get(
