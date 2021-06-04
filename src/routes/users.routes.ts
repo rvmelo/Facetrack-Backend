@@ -12,6 +12,7 @@ import ensureAuthenticated from '../middlewares/ensureAuthenticated';
 
 import uploadConfig from '../config/upload';
 import UpdateUserAvatarService from '../services/updateUserAvatarService';
+import RefreshUserInstagramDataService from '../services/refreshUserInstagramDataService';
 
 const userRoutes = Router();
 const upload = multer(uploadConfig);
@@ -84,6 +85,21 @@ userRoutes.patch('/', ensureAuthenticated, userValidation, async (req, res) => {
   });
 
   return res.json(updatedUser);
+});
+
+userRoutes.get('/instagram', ensureAuthenticated, async (req, res) => {
+  //  only reading permissions for instagram
+  const { token } = req.query;
+  // const { token } = req.headers.authorization;
+
+  const refreshUserInstagramToken = new RefreshUserInstagramDataService();
+
+  const instagramData = await refreshUserInstagramToken.execute({
+    userProviderId: req.user.id,
+    token: typeof token === 'string' ? token : '',
+  });
+
+  res.status(200).json(instagramData);
 });
 
 export default userRoutes;
