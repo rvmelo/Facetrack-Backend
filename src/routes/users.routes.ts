@@ -4,6 +4,7 @@ import { celebrate, Segments, Joi } from 'celebrate';
 import multer from 'multer';
 
 import CreateUserService from '../services/createUserService';
+import DeleteUserService from '../services/deleteUserService';
 import GenerateUserToken from '../services/generateUserToken';
 import UpdateUserService from '../services/updateUserService';
 
@@ -57,6 +58,16 @@ userRoutes.post('/', ensureSignUp, userValidation, async (req, res) => {
   });
 
   return res.status(200).json({ user: savedUser, token });
+});
+
+userRoutes.delete('/', ensureAuthenticated, async (req, res) => {
+  const deleteUserService = new DeleteUserService();
+
+  const deletedUser = await deleteUserService.execute({
+    userProviderId: req.user.id,
+  });
+
+  return res.status(200).json({ user: deletedUser });
 });
 
 userRoutes.patch(
