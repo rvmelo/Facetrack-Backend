@@ -1,6 +1,8 @@
 import { getMongoRepository, MongoRepository } from 'typeorm';
 import { isValid, differenceInYears, endOfDay } from 'date-fns';
 
+import { classToClass } from 'class-transformer';
+
 import AppError from '../errors/appError';
 import User from '../models/User';
 
@@ -8,7 +10,7 @@ interface IRequest {
   user: User;
 }
 
-class CreateOrUpdateUserService {
+class CreateUserService {
   private ormRepository: MongoRepository<User>;
 
   constructor() {
@@ -34,16 +36,12 @@ class CreateOrUpdateUserService {
       },
     });
 
-    if (!foundUser) {
-      const createdUser = this.ormRepository.create(user);
-      await this.ormRepository.save(createdUser);
-      return createdUser;
-    }
+    if (foundUser) throw new AppError('User already exists');
 
-    const updatedUser = await this.ormRepository.save(foundUser);
-
-    return updatedUser;
+    const createdUser = this.ormRepository.create(user);
+    await this.ormRepository.save(createdUser);
+    return classToClass(createdUser);
   }
 }
 
-export default CreateOrUpdateUserService;
+export default CreateUserService;

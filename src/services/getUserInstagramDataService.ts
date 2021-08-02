@@ -1,5 +1,10 @@
 import AppError from '../errors/appError';
-import { get_token, get_username, get_user_media } from '../apis/instagram';
+import {
+  get_token,
+  get_username,
+  get_user_media,
+  get_long_lived_access_token,
+} from '../apis/instagram';
 
 interface IRequest {
   authCode: string;
@@ -14,13 +19,17 @@ interface UserMedia {
 interface IResponse {
   userName: string;
   userMedia: UserMedia[];
+  token: string;
 }
 
 class GetUserInstagramDataService {
   private token: string | undefined;
 
+  private longLivedAccessToken: string | undefined;
+
   constructor() {
     this.token = undefined;
+    this.longLivedAccessToken = undefined;
   }
 
   public async execute({ authCode }: IRequest): Promise<IResponse> {
@@ -29,11 +38,12 @@ class GetUserInstagramDataService {
     }
 
     this.token = await get_token(authCode);
+    this.longLivedAccessToken = await get_long_lived_access_token(this.token);
 
-    const userName = await get_username(this.token);
-    const userMedia = await get_user_media(this.token);
+    const userName = await get_username(this.longLivedAccessToken);
+    const userMedia = await get_user_media(this.longLivedAccessToken);
 
-    return { userName, userMedia };
+    return { userName, userMedia, token: this.longLivedAccessToken };
   }
 }
 
