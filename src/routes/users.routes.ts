@@ -14,6 +14,7 @@ import ensureAuthenticated from '../middlewares/ensureAuthenticated';
 import uploadConfig from '../config/upload';
 import UpdateUserAvatarService from '../services/updateUserAvatarService';
 import RefreshUserInstagramDataService from '../services/refreshUserInstagramDataService';
+import FindUserService from '../services/findUsersService';
 
 const userRoutes = Router();
 const upload = multer(uploadConfig);
@@ -44,6 +45,17 @@ const userValidation = celebrate({
       userMedia: Joi.array().items(mediaSchema),
     }),
   },
+});
+
+userRoutes.get('/', ensureSignUp, async (req, res) => {
+  const { page } = req.query;
+
+  const findUsersService = new FindUserService();
+  const foundUsers = await findUsersService.execute({
+    page: typeof page === 'string' ? page : '0',
+  });
+
+  res.status(200).json({ foundUsers });
 });
 
 userRoutes.post('/', ensureSignUp, userValidation, async (req, res) => {
