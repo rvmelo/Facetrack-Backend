@@ -15,6 +15,7 @@ import uploadConfig from '../config/upload';
 import UpdateUserAvatarService from '../services/updateUserAvatarService';
 import RefreshUserInstagramDataService from '../services/refreshUserInstagramDataService';
 import FindUsersService from '../services/findUsersService';
+import RateUserService from '../services/rateUserService';
 
 const userRoutes = Router();
 const upload = multer(uploadConfig);
@@ -83,6 +84,20 @@ userRoutes.delete('/', ensureAuthenticated, async (req, res) => {
   return res.status(200).json({ user: deletedUser });
 });
 
+userRoutes.patch('/evaluation', ensureAuthenticated, async (req, res) => {
+  const rateUserService = new RateUserService();
+
+  const { toUserId, value } = req.query;
+
+  await rateUserService.execute({
+    fromUserProviderId: req.user.id,
+    toUserProviderId: typeof toUserId === 'string' ? toUserId : '',
+    value: typeof value === 'string' ? value : '',
+  });
+
+  return res.status(200);
+});
+
 userRoutes.patch(
   '/avatar',
   ensureAuthenticated,
@@ -95,7 +110,7 @@ userRoutes.patch(
       avatarFileName: req.file.filename,
     });
 
-    return res.json(user);
+    return res.status(200).json(user);
   },
 );
 

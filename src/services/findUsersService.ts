@@ -9,7 +9,7 @@ interface IRequest {
   page: string;
 }
 
-class FindUserService {
+class FindUsersService {
   private ormRepository: MongoRepository<User>;
 
   constructor() {
@@ -41,4 +41,4 @@ class FindUserService {
   }
 }
 
-export default FindUserService;
+export default FindUsersService;

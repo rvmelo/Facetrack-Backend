@@ -5,7 +5,6 @@ import {
   UpdateDateColumn,
   ObjectID,
   ObjectIdColumn,
-  PrimaryColumn,
 } from 'typeorm';
 
 import { Exclude } from 'class-transformer';
@@ -27,11 +26,14 @@ class User {
   @Exclude()
   id: ObjectID;
 
-  @PrimaryColumn()
+  @Column()
   userProviderId: string;
 
   @Column()
   name: string;
+
+  @Column()
+  rate: number;
 
   @Column()
   avatar: string;
