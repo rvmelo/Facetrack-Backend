@@ -16,6 +16,7 @@ import UpdateUserAvatarService from '../services/updateUserAvatarService';
 import RefreshUserInstagramDataService from '../services/refreshUserInstagramDataService';
 import FindUsersService from '../services/findUsersService';
 import RateUserService from '../services/rateUserService';
+import SendRateNotificationService from '../services/sendRateNotificationService';
 
 const userRoutes = Router();
 const upload = multer(uploadConfig);
@@ -86,10 +87,17 @@ userRoutes.delete('/', ensureAuthenticated, async (req, res) => {
 
 userRoutes.patch('/evaluation', ensureAuthenticated, async (req, res) => {
   const rateUserService = new RateUserService();
+  const sendRateNotificationService = new SendRateNotificationService();
 
   const { toUserId, value } = req.query;
 
   await rateUserService.execute({
+    fromUserProviderId: req.user.id,
+    toUserProviderId: typeof toUserId === 'string' ? toUserId : '',
+    value: typeof value === 'string' ? value : '',
+  });
+
+  await sendRateNotificationService.execute({
     fromUserProviderId: req.user.id,
     toUserProviderId: typeof toUserId === 'string' ? toUserId : '',
     value: typeof value === 'string' ? value : '',
