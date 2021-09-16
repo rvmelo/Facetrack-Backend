@@ -7,6 +7,8 @@ import CreateUserService from '../services/createUserService';
 import DeleteUserService from '../services/deleteUserService';
 import GenerateUserToken from '../services/generateUserToken';
 import UpdateUserService from '../services/updateUserService';
+import FindUsersService from '../services/findUsersService';
+import FindUserService from '../services/findUserService';
 
 import ensureSignUp from '../middlewares/ensureSignUp';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
@@ -14,9 +16,6 @@ import ensureAuthenticated from '../middlewares/ensureAuthenticated';
 import uploadConfig from '../config/upload';
 import UpdateUserAvatarService from '../services/updateUserAvatarService';
 import RefreshUserInstagramDataService from '../services/refreshUserInstagramDataService';
-import FindUsersService from '../services/findUsersService';
-import RateUserService from '../services/rateUserService';
-import SendRateNotificationService from '../services/sendRateNotificationService';
 
 const userRoutes = Router();
 const upload = multer(uploadConfig);
@@ -47,6 +46,15 @@ const userValidation = celebrate({
       userMedia: Joi.array().items(mediaSchema),
     }),
   },
+});
+
+userRoutes.get('/:userProviderId', ensureAuthenticated, async (req, res) => {
+  const { userProviderId } = req.params;
+
+  const findUserService = new FindUserService();
+  const foundUser = await findUserService.execute({ userProviderId });
+
+  return res.status(200).json(foundUser);
 });
 
 userRoutes.get('/', ensureAuthenticated, async (req, res) => {
@@ -85,27 +93,6 @@ userRoutes.delete('/', ensureAuthenticated, async (req, res) => {
   return res.status(200).json({ user: deletedUser });
 });
 
-userRoutes.patch('/evaluation', ensureAuthenticated, async (req, res) => {
-  const rateUserService = new RateUserService();
-  const sendRateNotificationService = new SendRateNotificationService();
-
-  const { toUserId, value } = req.query;
-
-  await rateUserService.execute({
-    fromUserProviderId: req.user.id,
-    toUserProviderId: typeof toUserId === 'string' ? toUserId : '',
-    value: typeof value === 'string' ? value : '',
-  });
-
-  await sendRateNotificationService.execute({
-    fromUserProviderId: req.user.id,
-    toUserProviderId: typeof toUserId === 'string' ? toUserId : '',
-    value: typeof value === 'string' ? value : '',
-  });
-
-  return res.status(200);
-});
-
 userRoutes.patch(
   '/avatar',
   ensureAuthenticated,
@@ -127,8 +114,10 @@ userRoutes.patch('/', ensureAuthenticated, userValidation, async (req, res) => {
 
   const userData = req.body;
 
+  const userProviderId = req.user.id;
+
   const updatedUser = await updateUserService.execute({
-    userData,
+    userData: { ...userData, userProviderId },
   });
 
   return res.json(updatedUser);

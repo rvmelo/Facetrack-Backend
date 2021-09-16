@@ -16,6 +16,8 @@ interface PushNotificationProps {
   expoPushToken: string;
   userName: string;
   value: string;
+  fromUserProviderId: string;
+  toUserProviderId: string;
 }
 
 // Can use this function below, OR use Expo's Push Notification Tool-> https://expo.dev/notifications
@@ -23,13 +25,15 @@ async function sendPushNotification({
   expoPushToken,
   userName,
   value,
+  fromUserProviderId,
+  toUserProviderId,
 }: PushNotificationProps) {
   const message: ExpoPushMessage = {
     to: expoPushToken,
     priority: 'high',
     title: 'You have been rated!!',
     body: `${userName} has rated you with ${value} stars!!`,
-    data: { someData: 'goes here' },
+    data: { fromUserProviderId, toUserProviderId },
   };
 
   const expo = new Expo();
@@ -89,6 +93,8 @@ class SendRateNotificationService {
       userName: name,
       value,
       expoPushToken: notificationToken,
+      fromUserProviderId,
+      toUserProviderId,
     });
   }
 }
