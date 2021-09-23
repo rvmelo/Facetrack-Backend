@@ -4,14 +4,14 @@ import passport from 'passport';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
-import User from '../models/User';
+import { IUser } from '../models/User';
 
 import FindUserService from '../services/findUserService';
 import GenerateUserToken from '../services/generateUserToken';
 import GetUserInstagramDataService from '../services/getUserInstagramDataService';
 
 interface RegisteredUser {
-  registeredUser: User;
+  registeredUser: IUser;
   token: string;
 }
 

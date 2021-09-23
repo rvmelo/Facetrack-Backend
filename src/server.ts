@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import './database';
 
 import express, { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import { errors } from 'celebrate';
 import 'express-async-errors';
 import passport from 'passport';
@@ -38,17 +39,21 @@ app.use(routes);
 
 app.use(errors());
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof AppError) {
-    res.status(error.statusCode).json({
+    return res.status(error.statusCode).json({
       status: 'error',
       message: error.message,
     });
   }
 
-  res
+  return res
     .status(500)
-    .json({ status: 'error', message: `Internal server error: ${error}` });
+    .json({ status: 'error', message: 'Internal server error' });
 });
 
-app.listen(3333, () => console.log('server started at port 3333'));
+mongoose.connect('mongodb://localhost:27017/facetrack', () => {
+  // eslint-disable-next-line no-console
+  app.listen(3333, () => console.log('server started at port 3333'));
+});

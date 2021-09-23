@@ -1,8 +1,7 @@
-import { getMongoRepository, MongoRepository } from 'typeorm';
-import User from '../models/User';
-
 import { get_user_media } from '../apis/instagram';
 import AppError from '../errors/appError';
+
+import FindUserService from './findUserService';
 
 interface IRequest {
   userProviderId: string;
@@ -20,19 +19,13 @@ interface IResponse {
 }
 
 class RefreshUserInstagramDataService {
-  private ormRepository: MongoRepository<User>;
-
-  constructor() {
-    this.ormRepository = getMongoRepository(User, 'mongo');
-  }
-
   public async execute({
     userProviderId,
     token,
   }: IRequest): Promise<IResponse> {
-    const foundUser = await this.ormRepository.findOne({
-      where: { userProviderId },
-    });
+    const findUserService = new FindUserService();
+
+    const foundUser = await findUserService.execute({ userProviderId });
 
     if (!foundUser) throw new AppError('user not found', 401);
 

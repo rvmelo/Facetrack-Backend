@@ -1,10 +1,8 @@
-import { getMongoRepository, MongoRepository } from 'typeorm';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 
-import { classToClass } from 'class-transformer';
-import User from '../models/User';
+import User, { IUser } from '../models/User';
 import AppError from '../errors/appError';
 
 import uploadConfig from '../config/upload';
@@ -15,21 +13,11 @@ interface Request {
 }
 
 class UpdateUserAvatarService {
-  private ormRepository: MongoRepository<User>;
-
-  constructor() {
-    this.ormRepository = getMongoRepository(User, 'mongo');
-  }
-
   public async execute({
     userProviderId,
     avatarFileName,
-  }: Request): Promise<User> {
-    const user = await this.ormRepository.findOne({
-      where: {
-        userProviderId,
-      },
-    });
+  }: Request): Promise<IUser> {
+    const user = await User.findOne({ userProviderId }).exec();
 
     if (!user) throw new AppError('can not change user avatar', 401);
 
@@ -59,9 +47,9 @@ class UpdateUserAvatarService {
     await fs.promises.unlink(avatarPath);
 
     user.avatar = resizedFile;
-    await this.ormRepository.save(user);
+    const savedUser = await user.save();
 
-    return classToClass(user);
+    return savedUser;
   }
 }
 

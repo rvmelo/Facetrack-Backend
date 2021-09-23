@@ -3,6 +3,7 @@ import ensureAuthenticated from '../middlewares/ensureAuthenticated';
 
 import RateUserService from '../services/rateUserService';
 import SendRateNotificationService from '../services/sendRateNotificationService';
+import FindEvaluationsService from '../services/findEvaluationsService';
 
 const evaluationRoutes = Router();
 
@@ -25,6 +26,19 @@ evaluationRoutes.patch('/', ensureAuthenticated, async (req, res) => {
   });
 
   return res.status(200);
+});
+
+evaluationRoutes.get('/', ensureAuthenticated, async (req, res) => {
+  const findEvaluationsService = new FindEvaluationsService();
+
+  const { page } = req.query;
+
+  const foundEvaluations = await findEvaluationsService.execute({
+    userProviderId: req.user.id,
+    page: typeof page === 'string' ? page : '1',
+  });
+
+  return res.status(200).json({ foundEvaluations });
 });
 
 export default evaluationRoutes;

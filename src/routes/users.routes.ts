@@ -30,9 +30,11 @@ const mediaSchema = Joi.object().keys({
 
 const userValidation = celebrate({
   [Segments.BODY]: {
+    _id: Joi.string(),
     userProviderId: Joi.string().required(),
     name: Joi.string().trim().min(3).required(),
     avatar: Joi.string().trim().allow(null, ''),
+    rate: Joi.number(),
     birthDate: Joi.date().required(),
     sex: Joi.string().valid('male', 'female').required(),
     relationshipStatus: Joi.string()
@@ -45,52 +47,25 @@ const userValidation = celebrate({
       userName: Joi.string().required(),
       userMedia: Joi.array().items(mediaSchema),
     }),
+    created_at: Joi.date(),
+    updated_at: Joi.date(),
+    __v: Joi.number(),
   },
 });
 
-userRoutes.get('/:userProviderId', ensureAuthenticated, async (req, res) => {
-  const { userProviderId } = req.params;
+userRoutes.get('/instagram', ensureAuthenticated, async (req, res) => {
+  //  only reading permissions for instagram
+  const { token } = req.query;
+  // const { token } = req.headers.authorization;
 
-  const findUserService = new FindUserService();
-  const foundUser = await findUserService.execute({ userProviderId });
+  const refreshUserInstagramToken = new RefreshUserInstagramDataService();
 
-  return res.status(200).json(foundUser);
-});
-
-userRoutes.get('/', ensureAuthenticated, async (req, res) => {
-  const { page } = req.query;
-
-  const findUsersService = new FindUsersService();
-  const foundUsers = await findUsersService.execute({
+  const instagramData = await refreshUserInstagramToken.execute({
     userProviderId: req.user.id,
-    page: typeof page === 'string' ? page : '0',
+    token: typeof token === 'string' ? token : '',
   });
 
-  res.status(200).json(foundUsers);
-});
-
-userRoutes.post('/', ensureSignUp, userValidation, async (req, res) => {
-  const user = req.body;
-
-  const createUserService = new CreateUserService();
-  const generateUserToken = new GenerateUserToken();
-
-  const savedUser = await createUserService.execute({ user });
-  const token = await generateUserToken.execute({
-    userProviderId: savedUser.userProviderId,
-  });
-
-  return res.status(200).json({ user: savedUser, token });
-});
-
-userRoutes.delete('/', ensureAuthenticated, async (req, res) => {
-  const deleteUserService = new DeleteUserService();
-
-  const deletedUser = await deleteUserService.execute({
-    userProviderId: req.user.id,
-  });
-
-  return res.status(200).json({ user: deletedUser });
+  return res.status(200).json(instagramData);
 });
 
 userRoutes.patch(
@@ -123,19 +98,49 @@ userRoutes.patch('/', ensureAuthenticated, userValidation, async (req, res) => {
   return res.json(updatedUser);
 });
 
-userRoutes.get('/instagram', ensureAuthenticated, async (req, res) => {
-  //  only reading permissions for instagram
-  const { token } = req.query;
-  // const { token } = req.headers.authorization;
+userRoutes.get('/:userProviderId', ensureAuthenticated, async (req, res) => {
+  const { userProviderId } = req.params;
 
-  const refreshUserInstagramToken = new RefreshUserInstagramDataService();
+  const findUserService = new FindUserService();
+  const foundUser = await findUserService.execute({ userProviderId });
 
-  const instagramData = await refreshUserInstagramToken.execute({
+  return res.status(200).json(foundUser);
+});
+
+userRoutes.get('/', ensureAuthenticated, async (req, res) => {
+  const { page } = req.query;
+
+  const findUsersService = new FindUsersService();
+  const foundUsers = await findUsersService.execute({
     userProviderId: req.user.id,
-    token: typeof token === 'string' ? token : '',
+    page: typeof page === 'string' ? page : '0',
   });
 
-  res.status(200).json(instagramData);
+  return res.status(200).json(foundUsers);
+});
+
+userRoutes.post('/', ensureSignUp, userValidation, async (req, res) => {
+  const user = req.body;
+
+  const createUserService = new CreateUserService();
+  const generateUserToken = new GenerateUserToken();
+
+  const savedUser = await createUserService.execute({ user });
+  const token = await generateUserToken.execute({
+    userProviderId: savedUser.userProviderId,
+  });
+
+  return res.status(200).json({ user: savedUser, token });
+});
+
+userRoutes.delete('/', ensureAuthenticated, async (req, res) => {
+  const deleteUserService = new DeleteUserService();
+
+  const deletedUser = await deleteUserService.execute({
+    userProviderId: req.user.id,
+  });
+
+  return res.status(200).json({ user: deletedUser });
 });
 
 export default userRoutes;
