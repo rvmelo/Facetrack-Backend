@@ -1,5 +1,4 @@
 import { Expo, ExpoPushMessage } from 'expo-server-sdk';
-import { getMongoRepository, MongoRepository } from 'typeorm';
 import AppError from '../errors/appError';
 
 import UserPermissions from '../models/UserPermissions';
@@ -52,12 +51,6 @@ async function sendPushNotification({
 }
 
 class SendRateNotificationService {
-  private ormRepository: MongoRepository<UserPermissions>;
-
-  constructor() {
-    this.ormRepository = getMongoRepository(UserPermissions, 'mongo');
-  }
-
   public async execute({
     toUserProviderId,
     fromUserProviderId,
@@ -77,9 +70,9 @@ class SendRateNotificationService {
       throw new AppError('User not found');
     }
 
-    const userPermissions = await this.ormRepository.findOne({
-      where: { userProviderId: toUserProviderId },
-    });
+    const userPermissions = await UserPermissions.findOne({
+      userProviderId: toUserProviderId,
+    }).exec();
 
     if (!userPermissions) {
       throw new AppError('No notification token found');

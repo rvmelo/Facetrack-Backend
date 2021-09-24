@@ -1,33 +1,34 @@
-import {
-  Entity,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ObjectID,
-  ObjectIdColumn,
-} from 'typeorm';
+import mongoose from 'mongoose';
 
-import { Exclude } from 'class-transformer';
+const { Schema, model } = mongoose;
 
-@Entity('user-permissions')
-class UserPermissions {
-  @ObjectIdColumn()
-  @Exclude()
-  id: ObjectID;
-
-  @Column()
+interface IUserPermission {
   userProviderId: string;
-
-  @Column()
   notificationToken: string;
-
-  @CreateDateColumn()
-  @Exclude()
   created_at: Date;
-
-  @UpdateDateColumn()
-  @Exclude()
   updated_at: Date;
 }
 
-export default UserPermissions;
+const userPermissionSchema = new Schema({
+  userProviderId: {
+    type: String,
+    required: true,
+    unique: true,
+    ref: 'User',
+  },
+  notificationToken: {
+    type: String,
+    required: true,
+  },
+  created_at: {
+    type: Date,
+    default: Date.now(),
+    required: true,
+  },
+  updated_at: {
+    type: Date,
+    required: false,
+  },
+});
+
+export default model<IUserPermission>('User-Permissions', userPermissionSchema);

@@ -1,4 +1,3 @@
-import { getMongoRepository, MongoRepository } from 'typeorm';
 import { Expo } from 'expo-server-sdk';
 import AppError from '../errors/appError';
 
@@ -12,12 +11,6 @@ interface IRequest {
 }
 
 class CreateNotificationTokenService {
-  private ormRepository: MongoRepository<UserPermissions>;
-
-  constructor() {
-    this.ormRepository = getMongoRepository(UserPermissions, 'mongo');
-  }
-
   public async execute({
     userProviderId,
     notificationToken,
@@ -38,26 +31,18 @@ class CreateNotificationTokenService {
       );
     }
 
-    const foundPermission = await this.ormRepository.findOne({
-      where: {
-        userProviderId,
-      },
-    });
+    const foundPermission = await UserPermissions.findOne({
+      userProviderId,
+    }).exec();
 
-    if (foundPermission) {
-      await this.ormRepository.save({
-        ...foundPermission,
-        userProviderId,
-        notificationToken,
-      });
-      return;
-    }
+    if (foundPermission) return;
 
-    const createdPermission = this.ormRepository.create({
+    const createdPermission = new UserPermissions({
       userProviderId,
       notificationToken,
     });
-    await this.ormRepository.save(createdPermission);
+
+    await createdPermission.save();
   }
 }
 
