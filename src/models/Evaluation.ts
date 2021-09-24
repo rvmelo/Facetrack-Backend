@@ -1,36 +1,39 @@
-import {
-  Entity,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ObjectID,
-  ObjectIdColumn,
-} from 'typeorm';
+import mongoose from 'mongoose';
 
-import { Exclude } from 'class-transformer';
+const { Schema, model } = mongoose;
 
-@Entity('evaluation')
-class Evaluation {
-  @ObjectIdColumn()
-  @Exclude()
-  id: ObjectID;
-
-  @Column()
-  value: number;
-
-  @Column()
+export interface IEvaluation {
+  value: string;
   fromUserId: string;
-
-  @Column()
   toUserId: string;
-
-  @CreateDateColumn()
-  @Exclude()
   created_at: Date;
-
-  @UpdateDateColumn()
-  @Exclude()
   updated_at: Date;
 }
 
-export default Evaluation;
+const evaluationSchema = new Schema({
+  value: {
+    type: Number,
+    required: true,
+  },
+  fromUserId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
+  toUserId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
+  created_at: {
+    type: Date,
+    default: Date.now(),
+    required: true,
+  },
+  updated_at: {
+    type: Date,
+    required: false,
+  },
+});
+
+export default model<IEvaluation>('Evaluation', evaluationSchema);

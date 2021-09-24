@@ -1,8 +1,7 @@
 /* eslint-disable radix */
-import { getMongoRepository, MongoRepository } from 'typeorm';
 import Evaluation from '../models/Evaluation';
+import User from '../models/User';
 import AppError from '../errors/appError';
-import FindUserService from './findUserService';
 
 interface IRequest {
   fromUserProviderId: string;
@@ -11,24 +10,20 @@ interface IRequest {
 }
 
 class RateUserService {
-  private ormRepository: MongoRepository<Evaluation>;
-
-  constructor() {
-    this.ormRepository = getMongoRepository(Evaluation, 'mongo');
-  }
-
   public async execute({
     fromUserProviderId,
     toUserProviderId,
     value,
   }: IRequest): Promise<void> {
-    const findUserService = new FindUserService();
-
-    const foundUser = await findUserService.execute({
+    const fromUser = await User.findOne({
       userProviderId: fromUserProviderId,
-    });
+    }).exec();
 
-    if (!foundUser) {
+    const toUser = await User.findOne({
+      userProviderId: toUserProviderId,
+    }).exec();
+
+    if (!fromUser || !toUser) {
       throw new AppError('User not found');
     }
 
@@ -38,25 +33,31 @@ class RateUserService {
       throw new AppError('Invalid value');
     }
 
-    const foundEvaluation = await this.ormRepository.findOne({
-      where: {
-        fromUserId: { $eq: fromUserProviderId },
-        toUserId: { $eq: toUserProviderId },
-      },
-    });
+    const foundEvaluation = await Evaluation.findOne()
+      .where('fromUserId')
+      .equals(fromUser)
+      .where('toUserId')
+      .equals(toUser)
+      .exec();
 
     if (foundEvaluation) {
-      await this.ormRepository.save({ ...foundEvaluation, value: parsedValue });
+      Object.assign(foundEvaluation, {
+        ...foundEvaluation,
+        value,
+        updated_at: Date.now(),
+      });
+
+      await foundEvaluation?.save();
       return;
     }
 
-    const createdEvaluation = this.ormRepository.create({
-      fromUserId: fromUserProviderId,
-      toUserId: toUserProviderId,
-      value: parsedValue,
+    const newEvaluation = new Evaluation({
+      fromUserId: fromUser,
+      toUserId: toUser,
+      value,
     });
 
-    await this.ormRepository.save(createdEvaluation);
+    await newEvaluation.save();
   }
 }
 

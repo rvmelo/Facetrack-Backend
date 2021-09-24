@@ -14,7 +14,6 @@ const userPermissionSchema = new Schema({
     type: String,
     required: true,
     unique: true,
-    ref: 'User',
   },
   notificationToken: {
     type: String,

@@ -1,9 +1,7 @@
 /* eslint-disable radix */
-import { getMongoRepository, MongoRepository } from 'typeorm';
-import { classToClass } from 'class-transformer';
-import Evaluation from '../models/Evaluation';
+import Evaluation, { IEvaluation } from '../models/Evaluation';
+import User from '../models/User';
 import AppError from '../errors/appError';
-import FindUserService from './findUserService';
 
 interface IRequest {
   userProviderId: string | undefined;
@@ -11,25 +9,15 @@ interface IRequest {
 }
 
 class FindEvaluationsService {
-  private ormRepository: MongoRepository<Evaluation>;
-
-  constructor() {
-    this.ormRepository = getMongoRepository(Evaluation, 'mongo');
-  }
-
   public async execute({
     page,
     userProviderId,
-  }: IRequest): Promise<Evaluation[] | undefined> {
-    const findUserService = new FindUserService();
-
+  }: IRequest): Promise<IEvaluation[] | undefined> {
     if (!userProviderId || !page) {
       throw new AppError('Invalid data');
     }
 
-    const foundUser = await findUserService.execute({
-      userProviderId,
-    });
+    const foundUser = await User.findOne({ userProviderId }).exec();
 
     if (!foundUser) {
       throw new AppError('User not found');
@@ -41,20 +29,16 @@ class FindEvaluationsService {
 
     const items_per_page = 2;
 
-    const foundEvaluations = await this.ormRepository.find({
-      skip: (parseInt(page) - 1) * items_per_page,
-      take: items_per_page,
-      order: {
-        created_at: 'DESC',
-      },
-      where: { toUserId: userProviderId },
-    });
+    const foundEvaluations = await Evaluation.find()
+      .sort({ updated_at: 'desc' })
+      .where('toUserId')
+      .equals(foundUser)
+      .populate('fromUserId', 'name userProviderId')
+      .skip((parseInt(page) - 1) * items_per_page)
+      .limit(items_per_page)
+      .exec();
 
-    const formattedEvaluations = foundEvaluations.map(foundEvaluation =>
-      classToClass(foundEvaluation),
-    );
-
-    return classToClass(formattedEvaluations);
+    return foundEvaluations;
   }
 }
 
