@@ -12,8 +12,8 @@ interface IUserPermission {
 const userPermissionSchema = new Schema({
   userProviderId: {
     type: String,
-    required: true,
     unique: true,
+    required: true,
   },
   notificationToken: {
     type: String,

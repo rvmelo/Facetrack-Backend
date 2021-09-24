@@ -39,6 +39,7 @@ export interface IUser {
 const userSchema = new Schema({
   userProviderId: {
     type: String,
+    unique: true,
     required: true,
   },
   name: {
