@@ -55,6 +55,7 @@ class RateUserService {
       fromUserId: fromUser,
       toUserId: toUser,
       value,
+      updated_at: Date.now(),
     });
 
     await newEvaluation.save();

@@ -31,11 +31,8 @@ evaluationRoutes.patch('/', ensureAuthenticated, async (req, res) => {
 evaluationRoutes.get('/', ensureAuthenticated, async (req, res) => {
   const findEvaluationsService = new FindEvaluationsService();
 
-  const { page } = req.query;
-
   const foundEvaluations = await findEvaluationsService.execute({
     userProviderId: req.user.id,
-    page: typeof page === 'string' ? page : '1',
   });
 
   return res.status(200).json({ foundEvaluations });

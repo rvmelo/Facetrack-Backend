@@ -5,15 +5,13 @@ import AppError from '../errors/appError';
 
 interface IRequest {
   userProviderId: string | undefined;
-  page: string | undefined;
 }
 
 class FindEvaluationsService {
   public async execute({
-    page,
     userProviderId,
   }: IRequest): Promise<IEvaluation[] | undefined> {
-    if (!userProviderId || !page) {
+    if (!userProviderId) {
       throw new AppError('Invalid data');
     }
 
@@ -23,19 +21,23 @@ class FindEvaluationsService {
       throw new AppError('User not found');
     }
 
-    if (parseInt(page) < 1) {
-      throw new AppError('Invalid page number');
-    }
+    const maximum_amount = 2;
 
-    const items_per_page = 2;
+    // const foundEvaluations = await Evaluation.find()
+    //   .sort({ updated_at: 'desc' })
+    //   .where('toUserId')
+    //   .equals(foundUser)
+    //   .populate('fromUserId', 'name userProviderId avatar instagram.userName')
+    //   .skip((parseInt(page) - 1) * items_per_page)
+    //   .limit(items_per_page)
+    //   .exec();
 
     const foundEvaluations = await Evaluation.find()
       .sort({ updated_at: 'desc' })
       .where('toUserId')
       .equals(foundUser)
-      .populate('fromUserId', 'name userProviderId')
-      .skip((parseInt(page) - 1) * items_per_page)
-      .limit(items_per_page)
+      .populate('fromUserId', 'name userProviderId avatar instagram.userName')
+      .limit(maximum_amount)
       .exec();
 
     return foundEvaluations;
