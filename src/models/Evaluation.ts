@@ -25,6 +25,11 @@ const evaluationSchema = new Schema({
     required: true,
     ref: 'User',
   },
+  isRead: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
   created_at: {
     type: Date,
     default: Date.now(),
