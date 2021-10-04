@@ -1,26 +1,14 @@
-import { getMongoRepository, MongoRepository } from 'typeorm';
-import { classToClass } from 'class-transformer';
-import User from '../models/User';
+import User, { IUser } from '../models/User';
 
 interface IRequest {
   userProviderId: string;
 }
 
 class FindUserService {
-  private ormRepository: MongoRepository<User>;
+  public async execute({ userProviderId }: IRequest): Promise<IUser | null> {
+    const foundUser = await User.findOne({ userProviderId }).exec();
 
-  constructor() {
-    this.ormRepository = getMongoRepository(User, 'mongo');
-  }
-
-  public async execute({
-    userProviderId,
-  }: IRequest): Promise<User | undefined> {
-    const foundUser = await this.ormRepository.findOne({
-      where: { userProviderId },
-    });
-
-    return classToClass(foundUser);
+    return foundUser;
   }
 }
 

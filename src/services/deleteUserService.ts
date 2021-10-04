@@ -1,11 +1,8 @@
-import { getMongoRepository, MongoRepository } from 'typeorm';
 import fs from 'fs';
 import path from 'path';
 
-import { classToClass } from 'class-transformer';
-
 import AppError from '../errors/appError';
-import User from '../models/User';
+import User, { IUser } from '../models/User';
 
 import uploadConfig from '../config/upload';
 
@@ -14,16 +11,8 @@ interface IRequest {
 }
 
 class DeleteUserService {
-  private ormRepository: MongoRepository<User>;
-
-  constructor() {
-    this.ormRepository = getMongoRepository(User, 'mongo');
-  }
-
-  public async execute({ userProviderId }: IRequest): Promise<User> {
-    const foundUser = await this.ormRepository.findOne({
-      where: { userProviderId },
-    });
+  public async execute({ userProviderId }: IRequest): Promise<IUser> {
+    const foundUser = await User.findOneAndDelete({ userProviderId }).exec();
 
     if (!foundUser) throw new AppError('User does not exist');
 
@@ -40,9 +29,7 @@ class DeleteUserService {
       }
     }
 
-    await this.ormRepository.delete(foundUser);
-
-    return classToClass(foundUser);
+    return foundUser;
   }
 }
 

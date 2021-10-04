@@ -1,23 +1,16 @@
-import { getMongoRepository, MongoRepository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
 import authConfig from '../config/auth';
-import User from '../models/User';
+import FindUserService from './findUserService';
 
 interface IRequest {
   userProviderId: string;
 }
 
 class GenerateUserToken {
-  private ormRepository: MongoRepository<User>;
-
-  constructor() {
-    this.ormRepository = getMongoRepository(User, 'mongo');
-  }
-
   public async execute({ userProviderId }: IRequest): Promise<string> {
-    const foundUser = await this.ormRepository.findOne({
-      where: { userProviderId },
-    });
+    const findUserService = new FindUserService();
+
+    const foundUser = await findUserService.execute({ userProviderId });
 
     const { secret, secretForNonRegisteredUsers, expiresIn } = authConfig.jwt;
 

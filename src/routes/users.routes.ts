@@ -7,6 +7,8 @@ import CreateUserService from '../services/createUserService';
 import DeleteUserService from '../services/deleteUserService';
 import GenerateUserToken from '../services/generateUserToken';
 import UpdateUserService from '../services/updateUserService';
+import FindUsersService from '../services/findUsersService';
+import FindUserService from '../services/findUserService';
 
 import ensureSignUp from '../middlewares/ensureSignUp';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
@@ -28,9 +30,11 @@ const mediaSchema = Joi.object().keys({
 
 const userValidation = celebrate({
   [Segments.BODY]: {
+    _id: Joi.string(),
     userProviderId: Joi.string().required(),
     name: Joi.string().trim().min(3).required(),
     avatar: Joi.string().trim().allow(null, ''),
+    rate: Joi.number(),
     birthDate: Joi.date().required(),
     sex: Joi.string().valid('male', 'female').required(),
     relationshipStatus: Joi.string()
@@ -43,7 +47,73 @@ const userValidation = celebrate({
       userName: Joi.string().required(),
       userMedia: Joi.array().items(mediaSchema),
     }),
+    created_at: Joi.date(),
+    updated_at: Joi.date(),
+    __v: Joi.number(),
   },
+});
+
+userRoutes.get('/instagram', ensureAuthenticated, async (req, res) => {
+  //  only reading permissions for instagram
+  const { token } = req.query;
+  // const { token } = req.headers.authorization;
+
+  const refreshUserInstagramToken = new RefreshUserInstagramDataService();
+
+  const instagramData = await refreshUserInstagramToken.execute({
+    userProviderId: req.user.id,
+    token: typeof token === 'string' ? token : '',
+  });
+
+  return res.status(200).json(instagramData);
+});
+
+userRoutes.patch(
+  '/avatar',
+  ensureAuthenticated,
+  upload.single('avatar'),
+  async (req, res) => {
+    const updateAvatarService = new UpdateUserAvatarService();
+
+    const user = await updateAvatarService.execute({
+      userProviderId: req.user.id,
+      avatarFileName: req.file.filename,
+    });
+
+    return res.status(200).json(user);
+  },
+);
+
+userRoutes.patch('/', ensureAuthenticated, userValidation, async (req, res) => {
+  const updateUserService = new UpdateUserService();
+
+  const userData = req.body;
+
+  const userProviderId = req.user.id;
+
+  const updatedUser = await updateUserService.execute({
+    userData: { ...userData, userProviderId },
+  });
+
+  return res.json(updatedUser);
+});
+
+userRoutes.get('/:userProviderId', ensureAuthenticated, async (req, res) => {
+  const { userProviderId } = req.params;
+
+  const findUserService = new FindUserService();
+  const foundUser = await findUserService.execute({ userProviderId });
+
+  return res.status(200).json(foundUser);
+});
+
+userRoutes.get('/', ensureAuthenticated, async (req, res) => {
+  const findUsersService = new FindUsersService();
+  const foundUsers = await findUsersService.execute({
+    userProviderId: req.user.id,
+  });
+
+  return res.status(200).json(foundUsers);
 });
 
 userRoutes.post('/', ensureSignUp, userValidation, async (req, res) => {
@@ -68,49 +138,6 @@ userRoutes.delete('/', ensureAuthenticated, async (req, res) => {
   });
 
   return res.status(200).json({ user: deletedUser });
-});
-
-userRoutes.patch(
-  '/avatar',
-  ensureAuthenticated,
-  upload.single('avatar'),
-  async (req, res) => {
-    const updateAvatarService = new UpdateUserAvatarService();
-
-    const user = await updateAvatarService.execute({
-      userProviderId: req.user.id,
-      avatarFileName: req.file.filename,
-    });
-
-    return res.json(user);
-  },
-);
-
-userRoutes.patch('/', ensureAuthenticated, userValidation, async (req, res) => {
-  const updateUserService = new UpdateUserService();
-
-  const userData = req.body;
-
-  const updatedUser = await updateUserService.execute({
-    userData,
-  });
-
-  return res.json(updatedUser);
-});
-
-userRoutes.get('/instagram', ensureAuthenticated, async (req, res) => {
-  //  only reading permissions for instagram
-  const { token } = req.query;
-  // const { token } = req.headers.authorization;
-
-  const refreshUserInstagramToken = new RefreshUserInstagramDataService();
-
-  const instagramData = await refreshUserInstagramToken.execute({
-    userProviderId: req.user.id,
-    token: typeof token === 'string' ? token : '',
-  });
-
-  res.status(200).json(instagramData);
 });
 
 export default userRoutes;

@@ -1,68 +1,122 @@
-import {
-  Entity,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ObjectID,
-  ObjectIdColumn,
-  PrimaryColumn,
-} from 'typeorm';
+import mongoose from 'mongoose';
 
-import { Exclude } from 'class-transformer';
+const { Schema, model } = mongoose;
+
+export type media_types = 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
 
 interface UserMedia {
   id: string;
   caption: string;
   media_url: string;
+  media_type: media_types;
+  timestamp: string;
 }
 
-interface InstagramData {
-  userName: string;
-  userMedia: UserMedia[];
-}
-
-@Entity('users')
-class User {
-  @ObjectIdColumn()
-  @Exclude()
-  id: ObjectID;
-
-  @PrimaryColumn()
+export interface IUser {
   userProviderId: string;
-
-  @Column()
   name: string;
-
-  @Column()
   avatar: string;
-
-  @Column()
-  birthDate: Date;
-
-  @Column()
+  rate: number;
+  birthDate: string | undefined;
   sex: 'male' | 'female' | undefined;
-
-  @Column()
   relationshipStatus: 'single' | 'serious relationship' | 'married' | undefined;
-
-  @Column()
   sexualOrientation:
     | 'heterosexual'
     | 'homosexual'
     | 'bisexual'
     | 'asexual'
     | undefined;
-
-  @Column()
-  instagram: InstagramData;
-
-  @CreateDateColumn()
-  @Exclude()
+  instagram:
+    | {
+        userName: string;
+        userMedia: UserMedia[];
+      }
+    | undefined;
   created_at: Date;
-
-  @UpdateDateColumn()
-  @Exclude()
   updated_at: Date;
 }
 
-export default User;
+const userSchema = new Schema({
+  userProviderId: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  rate: {
+    type: Number,
+    required: false,
+  },
+  avatar: {
+    type: String,
+    required: false,
+  },
+  birthDate: {
+    type: Date,
+    required: true,
+  },
+  sex: {
+    type: String,
+    enum: ['male', 'female'],
+    required: true,
+  },
+  relationshipStatus: {
+    type: String,
+    default: undefined,
+    enum: ['single', 'serious relationship', 'married'],
+    required: true,
+  },
+  sexualOrientation: {
+    type: String,
+    default: undefined,
+    enum: ['heterosexual', 'homosexual', 'bisexual', 'asexual'],
+    required: true,
+  },
+  instagram: {
+    userName: {
+      type: String,
+      required: true,
+    },
+    userMedia: {
+      type: [
+        {
+          id: {
+            type: String,
+            required: true,
+          },
+          caption: {
+            type: String,
+            required: false,
+          },
+          media_url: {
+            type: String,
+            required: true,
+          },
+          media_type: {
+            type: String,
+            enum: ['IMAGE', 'VIDEO', 'CAROUSEL_ALBUM'],
+            required: true,
+          },
+          timestamp: {
+            type: String,
+            required: false,
+          },
+        },
+      ],
+    },
+  },
+  created_at: {
+    type: Date,
+    default: Date.now(),
+    required: true,
+  },
+  updated_at: {
+    type: Date,
+    required: false,
+  },
+});
+
+export default model<IUser>('User', userSchema);
