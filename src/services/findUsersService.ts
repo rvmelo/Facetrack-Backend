@@ -1,27 +1,26 @@
 /* eslint-disable radix */
 import User, { IUser } from '../models/User';
-import AppError from '../errors/appError';
 
 interface IRequest {
   userProviderId: string;
-  page: string;
 }
 
 class FindUsersService {
   public async execute({
-    page,
     userProviderId,
   }: IRequest): Promise<IUser[] | undefined> {
-    if (parseInt(page) < 1) {
-      throw new AppError('Invalid page number');
-    }
-
     const items_per_page = 2;
+
+    const count = await User.find({ userProviderId: { $ne: userProviderId } })
+      .count()
+      .exec();
+
+    const randomValue = Math.floor(Math.random() * count);
 
     const foundUsers = await User.find({
       userProviderId: { $ne: userProviderId },
     })
-      .skip((parseInt(page) - 1) * items_per_page)
+      .skip(randomValue)
       .limit(items_per_page)
       .exec();
 

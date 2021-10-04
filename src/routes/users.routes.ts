@@ -108,12 +108,9 @@ userRoutes.get('/:userProviderId', ensureAuthenticated, async (req, res) => {
 });
 
 userRoutes.get('/', ensureAuthenticated, async (req, res) => {
-  const { page } = req.query;
-
   const findUsersService = new FindUsersService();
   const foundUsers = await findUsersService.execute({
     userProviderId: req.user.id,
-    page: typeof page === 'string' ? page : '0',
   });
 
   return res.status(200).json(foundUsers);
