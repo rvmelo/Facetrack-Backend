@@ -32,6 +32,10 @@ export interface IUser {
         userMedia: UserMedia[];
       }
     | undefined;
+  location: {
+    type: string;
+    coordinates: [number];
+  };
   created_at: Date;
   updated_at: Date;
 }
@@ -108,6 +112,14 @@ const userSchema = new Schema({
       ],
     },
   },
+  location: {
+    type: {
+      type: String,
+      enum: 'Point',
+    },
+    coordinates: [Number],
+    required: false,
+  },
   created_at: {
     type: Date,
     default: Date.now(),
@@ -118,5 +130,7 @@ const userSchema = new Schema({
     required: false,
   },
 });
+
+userSchema.index({ location: '2dsphere' });
 
 export default model<IUser>('User', userSchema);
