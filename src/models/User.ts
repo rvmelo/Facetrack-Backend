@@ -34,7 +34,7 @@ export interface IUser {
     | undefined;
   location: {
     type: string;
-    coordinates: [number];
+    coordinates: [number, number];
   };
   created_at: Date;
   updated_at: Date;

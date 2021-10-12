@@ -10,6 +10,7 @@ import UpdateUserService from '../services/updateUserService';
 import FindUsersService from '../services/findUsersService';
 import FindUserService from '../services/findUserService';
 import UpdateUserLocationService from '../services/updateUserLocationService';
+import TrackUsersService from '../services/trackUsersService';
 
 import ensureSignUp from '../middlewares/ensureSignUp';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
@@ -99,6 +100,21 @@ userRoutes.patch('/update-location', ensureAuthenticated, async (req, res) => {
   });
 
   return res.json(updatedUser);
+});
+
+userRoutes.get('/track-user', ensureAuthenticated, async (req, res) => {
+  const trackUsersService = new TrackUsersService();
+
+  const { distance } = req.query;
+
+  const userProviderId = req.user.id;
+
+  const foundUsers = await trackUsersService.execute({
+    userProviderId,
+    distance: typeof distance === 'string' ? distance : '',
+  });
+
+  return res.json(foundUsers);
 });
 
 userRoutes.patch('/', ensureAuthenticated, userValidation, async (req, res) => {
