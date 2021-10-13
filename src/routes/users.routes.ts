@@ -105,13 +105,14 @@ userRoutes.patch('/update-location', ensureAuthenticated, async (req, res) => {
 userRoutes.get('/track-user', ensureAuthenticated, async (req, res) => {
   const trackUsersService = new TrackUsersService();
 
-  const { distance } = req.query;
+  const { distance, page } = req.query;
 
   const userProviderId = req.user.id;
 
   const foundUsers = await trackUsersService.execute({
     userProviderId,
     distance: typeof distance === 'string' ? distance : '',
+    page: typeof page === 'string' ? page : '',
   });
 
   return res.json(foundUsers);
