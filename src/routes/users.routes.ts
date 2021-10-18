@@ -11,6 +11,7 @@ import FindUsersService from '../services/findUsersService';
 import FindUserService from '../services/findUserService';
 import UpdateUserLocationService from '../services/updateUserLocationService';
 import TrackUsersService from '../services/trackUsersService';
+import SearchUsersService from '../services/searchUsersService';
 
 import ensureSignUp from '../middlewares/ensureSignUp';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
@@ -100,6 +101,18 @@ userRoutes.patch('/update-location', ensureAuthenticated, async (req, res) => {
   });
 
   return res.json(updatedUser);
+});
+
+userRoutes.get('/search-user', ensureAuthenticated, async (req, res) => {
+  const searchUsersService = new SearchUsersService();
+
+  const { query } = req.query;
+
+  const foundUsers = await searchUsersService.execute({
+    query: typeof query === 'string' ? query : '',
+  });
+
+  return res.json(foundUsers);
 });
 
 userRoutes.get('/track-user', ensureAuthenticated, async (req, res) => {
