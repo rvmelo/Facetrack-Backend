@@ -9,6 +9,8 @@ import GenerateUserToken from '../services/generateUserToken';
 import UpdateUserService from '../services/updateUserService';
 import FindUsersService from '../services/findUsersService';
 import FindUserService from '../services/findUserService';
+import UpdateUserLocationService from '../services/updateUserLocationService';
+import TrackUsersService from '../services/trackUsersService';
 
 import ensureSignUp from '../middlewares/ensureSignUp';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
@@ -47,6 +49,7 @@ const userValidation = celebrate({
       userName: Joi.string().required(),
       userMedia: Joi.array().items(mediaSchema),
     }),
+    location: Joi.object(),
     created_at: Joi.date(),
     updated_at: Joi.date(),
     __v: Joi.number(),
@@ -77,12 +80,43 @@ userRoutes.patch(
 
     const user = await updateAvatarService.execute({
       userProviderId: req.user.id,
-      avatarFileName: req.file.filename,
+      avatarFileName: req.file ? req.file.filename : '',
     });
 
     return res.status(200).json(user);
   },
 );
+
+userRoutes.patch('/update-location', ensureAuthenticated, async (req, res) => {
+  const updateUserLocationService = new UpdateUserLocationService();
+
+  const { coords } = req.body;
+
+  const userProviderId = req.user.id;
+
+  const updatedUser = await updateUserLocationService.execute({
+    userProviderId,
+    coords,
+  });
+
+  return res.json(updatedUser);
+});
+
+userRoutes.get('/track-user', ensureAuthenticated, async (req, res) => {
+  const trackUsersService = new TrackUsersService();
+
+  const { distance, page } = req.query;
+
+  const userProviderId = req.user.id;
+
+  const foundUsers = await trackUsersService.execute({
+    userProviderId,
+    distance: typeof distance === 'string' ? distance : '',
+    page: typeof page === 'string' ? page : '',
+  });
+
+  return res.json(foundUsers);
+});
 
 userRoutes.patch('/', ensureAuthenticated, userValidation, async (req, res) => {
   const updateUserService = new UpdateUserService();

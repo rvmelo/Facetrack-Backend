@@ -26,7 +26,7 @@ evaluationRoutes.patch('/', ensureAuthenticated, async (req, res) => {
     value: typeof value === 'string' ? value : '',
   });
 
-  return res.status(200);
+  return res.status(200).json({});
 });
 
 evaluationRoutes.get('/', ensureAuthenticated, async (req, res) => {
