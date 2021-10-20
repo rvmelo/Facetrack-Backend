@@ -8,6 +8,8 @@ class SearchUsersService {
   public async execute({ query }: IRequest): Promise<IUser[]> {
     User.createIndexes([{ name: 1 }, { 'instagram.userName': 1 }]);
 
+    const maximum_amount = 30;
+
     const foundUsers = await User.find({
       $or: [
         {
@@ -17,7 +19,9 @@ class SearchUsersService {
           'instagram.userName': { $regex: query, $options: 'i' },
         },
       ],
-    }).exec();
+    })
+      .limit(maximum_amount)
+      .exec();
 
     return foundUsers;
   }

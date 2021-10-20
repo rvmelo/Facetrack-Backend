@@ -131,7 +131,7 @@ userRoutes.get('/track-user', ensureAuthenticated, async (req, res) => {
   return res.json(foundUsers);
 });
 
-userRoutes.patch('/', ensureAuthenticated, userValidation, async (req, res) => {
+userRoutes.patch('/', ensureAuthenticated, async (req, res) => {
   const updateUserService = new UpdateUserService();
 
   const userData = req.body;
