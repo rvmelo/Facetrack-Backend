@@ -132,17 +132,21 @@ userRoutes.get('/track-user', ensureAuthenticated, async (req, res) => {
   return res.status(200).json(foundUsers);
 });
 
-userRoutes.get('/update-rate', ensureAuthenticated, async (req, res) => {
-  const updateUserRateService = new UpdateUserRateService();
+userRoutes.get(
+  '/update-rate/:userProviderId',
+  ensureAuthenticated,
+  async (req, res) => {
+    const updateUserRateService = new UpdateUserRateService();
 
-  const userProviderId = req.user.id;
+    const { userProviderId } = req.params;
 
-  const rate = await updateUserRateService.execute({
-    userProviderId,
-  });
+    const rate = await updateUserRateService.execute({
+      userProviderId,
+    });
 
-  return res.status(200).json({ rate });
-});
+    return res.status(200).json({ rate });
+  },
+);
 
 userRoutes.patch('/', ensureAuthenticated, async (req, res) => {
   const updateUserService = new UpdateUserService();
