@@ -110,7 +110,7 @@ userRoutes.get('/search-user', ensureAuthenticated, async (req, res) => {
   const { query } = req.query;
 
   const foundUsers = await searchUsersService.execute({
-    query: typeof query === 'string' ? query : '',
+    query: typeof query === 'string' ? query.trim() : '',
   });
 
   return res.status(200).json(foundUsers);

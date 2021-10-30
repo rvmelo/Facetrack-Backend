@@ -8,13 +8,13 @@ import FindUserService from './findUserService';
 interface IRequest {
   fromUserProviderId: string;
   toUserProviderId: string;
-  value: string;
+  value: number;
 }
 
 interface PushNotificationProps {
   expoPushToken: string;
   userName: string;
-  value: string;
+  value: number;
   fromUserProviderId: string;
   toUserProviderId: string;
 }
