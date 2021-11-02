@@ -9,7 +9,7 @@ interface IRequest {
 }
 
 class UpdateUserRateService {
-  public async execute({ userProviderId }: IRequest): Promise<number | void> {
+  public async execute({ userProviderId }: IRequest): Promise<number> {
     const user = await User.findOne({
       userProviderId,
     }).exec();
