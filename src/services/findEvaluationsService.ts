@@ -1,5 +1,3 @@
-/* eslint-disable use-isnan */
-/* eslint-disable radix */
 import Evaluation, { IEvaluation } from '../models/Evaluation';
 import User from '../models/User';
 import AppError from '../errors/appError';
@@ -18,7 +16,7 @@ class FindEvaluationsService {
       throw new AppError('Invalid data');
     }
 
-    if (Number(page) === NaN || parseInt(page) < 0) {
+    if (Object.is(NaN, parseInt(page, 10)) || parseInt(page, 10) < 1) {
       throw new AppError('Invalid page number');
     }
 
@@ -35,7 +33,7 @@ class FindEvaluationsService {
       .where('toUserId')
       .equals(foundUser)
       .populate('fromUserId', 'name userProviderId avatar instagram.userName')
-      .skip((parseInt(page) - 1) * items_per_page)
+      .skip((parseInt(page, 10) - 1) * items_per_page)
       .limit(items_per_page)
       .exec();
 
