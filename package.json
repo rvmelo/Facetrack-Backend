@@ -8,6 +8,7 @@
     "dev:server": "ts-node-dev --transpile-only --ignore-watch node_modules src/server.ts"
   },
   "dependencies": {
+    "aws-sdk": "^2.1023.0",
     "axios": "^0.21.1",
     "celebrate": "^14.0.0",
     "class-transformer": "^0.4.0",
@@ -20,6 +21,7 @@
     "express-async-errors": "^3.1.1",
     "express-rate-limit": "^5.2.6",
     "jsonwebtoken": "^8.5.1",
+    "mime": "^3.0.0",
     "mongodb": "^3.6.4",
     "mongoose": "^6.0.7",
     "multer": "^1.4.2",
@@ -35,6 +37,7 @@
     "@types/express": "^4.17.11",
     "@types/express-rate-limit": "^5.1.1",
     "@types/jsonwebtoken": "^8.5.0",
+    "@types/mime": "^2.0.3",
     "@types/mongodb": "^3.6.8",
     "@types/multer": "^1.4.5",
     "@types/passport-facebook": "^2.1.10",
