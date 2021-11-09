@@ -4,3 +4,4 @@ tmp/*
 .env
 ormconfig.json
 dist
+docker-compose.yml

@@ -52,7 +52,10 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     .json({ status: 'error', message: 'Internal server error' });
 });
 
-mongoose.connect(`${process.env.MONGODB_URL}`, () => {
+mongoose.connect(`${process.env.MONGODB_URL}?authSource=admin`, () => {
   // eslint-disable-next-line no-console
   app.listen(3333, () => console.log('server started at port 3333'));
 });
+
+// eslint-disable-next-line no-console
+mongoose.connection.on('error', error => console.log('error: ', error));

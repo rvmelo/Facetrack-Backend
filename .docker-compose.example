@@ -1,0 +1,14 @@
+version: '2.0'
+
+services:
+
+  mongo:
+    image: mongo
+    container_name: container_name
+    restart: always
+    ports:
+      - port:port
+    environment:
+      MONGO_INITDB_DATABASE: database_name
+      MONGO_INITDB_ROOT_USERNAME: user_name
+      MONGO_INITDB_ROOT_PASSWORD: password
