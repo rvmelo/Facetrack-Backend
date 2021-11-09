@@ -6,7 +6,8 @@ import AppError from '../errors/appError';
 interface IRequest {
   fromUserProviderId: string;
   toUserProviderId: string;
-  value: string;
+  value: number;
+  message: string | undefined;
 }
 
 class RateUserService {
@@ -14,6 +15,7 @@ class RateUserService {
     fromUserProviderId,
     toUserProviderId,
     value,
+    message,
   }: IRequest): Promise<void> {
     const fromUser = await User.findOne({
       userProviderId: fromUserProviderId,
@@ -27,9 +29,11 @@ class RateUserService {
       throw new AppError('User not found');
     }
 
-    const parsedValue = parseInt(value);
+    if (!value) {
+      throw new AppError('Value is required');
+    }
 
-    if (parsedValue < 1 || parsedValue > 5) {
+    if (value < 1 || value > 5) {
       throw new AppError('Invalid value');
     }
 
@@ -40,22 +44,25 @@ class RateUserService {
       .equals(toUser)
       .exec();
 
+    const requestData = message
+      ? { value, message, updated_at: Date.now() }
+      : { value, updated_at: Date.now() };
+
     if (foundEvaluation) {
       Object.assign(foundEvaluation, {
         ...foundEvaluation,
-        value,
-        updated_at: Date.now(),
+        ...requestData,
       });
 
       await foundEvaluation?.save();
+
       return;
     }
 
     const newEvaluation = new Evaluation({
       fromUserId: fromUser,
       toUserId: toUser,
-      value,
-      updated_at: Date.now(),
+      ...requestData,
     });
 
     await newEvaluation.save();

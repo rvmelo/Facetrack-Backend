@@ -15,6 +15,10 @@ const evaluationSchema = new Schema({
     type: Number,
     required: true,
   },
+  message: {
+    type: String,
+    required: false,
+  },
   fromUserId: {
     type: Schema.Types.ObjectId,
     required: true,

@@ -8,13 +8,13 @@ import FindUserService from './findUserService';
 interface IRequest {
   fromUserProviderId: string;
   toUserProviderId: string;
-  value: string;
+  value: number;
 }
 
 interface PushNotificationProps {
   expoPushToken: string;
   userName: string;
-  value: string;
+  value: number;
   fromUserProviderId: string;
   toUserProviderId: string;
 }
@@ -46,7 +46,9 @@ async function sendPushNotification({
   const tickets = await expo.sendPushNotificationsAsync([message]);
 
   if (tickets[0].status === 'error') {
-    throw new AppError('Failed to send notification', 500);
+    const { message: errorMessage } = tickets[0] || {};
+
+    throw new AppError(errorMessage, 500);
   }
 }
 
@@ -82,7 +84,7 @@ class SendRateNotificationService {
 
     const { name } = fromUser;
 
-    sendPushNotification({
+    await sendPushNotification({
       userName: name,
       value,
       expoPushToken: notificationToken,

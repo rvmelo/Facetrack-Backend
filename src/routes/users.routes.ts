@@ -11,6 +11,8 @@ import FindUsersService from '../services/findUsersService';
 import FindUserService from '../services/findUserService';
 import UpdateUserLocationService from '../services/updateUserLocationService';
 import TrackUsersService from '../services/trackUsersService';
+import SearchUsersService from '../services/searchUsersService';
+import UpdateUserRateService from '../services/updateUserRateService';
 
 import ensureSignUp from '../middlewares/ensureSignUp';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
@@ -99,7 +101,19 @@ userRoutes.patch('/update-location', ensureAuthenticated, async (req, res) => {
     coords,
   });
 
-  return res.json(updatedUser);
+  return res.status(200).json(updatedUser);
+});
+
+userRoutes.get('/search-user', ensureAuthenticated, async (req, res) => {
+  const searchUsersService = new SearchUsersService();
+
+  const { query } = req.query;
+
+  const foundUsers = await searchUsersService.execute({
+    query: typeof query === 'string' ? query.trim() : '',
+  });
+
+  return res.status(200).json(foundUsers);
 });
 
 userRoutes.get('/track-user', ensureAuthenticated, async (req, res) => {
@@ -115,10 +129,26 @@ userRoutes.get('/track-user', ensureAuthenticated, async (req, res) => {
     page: typeof page === 'string' ? page : '',
   });
 
-  return res.json(foundUsers);
+  return res.status(200).json(foundUsers);
 });
 
-userRoutes.patch('/', ensureAuthenticated, userValidation, async (req, res) => {
+userRoutes.get(
+  '/update-rate/:userProviderId',
+  ensureAuthenticated,
+  async (req, res) => {
+    const updateUserRateService = new UpdateUserRateService();
+
+    const { userProviderId } = req.params;
+
+    const rate = await updateUserRateService.execute({
+      userProviderId,
+    });
+
+    return res.status(200).json({ rate });
+  },
+);
+
+userRoutes.patch('/', ensureAuthenticated, async (req, res) => {
   const updateUserService = new UpdateUserService();
 
   const userData = req.body;

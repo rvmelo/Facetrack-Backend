@@ -1,11 +1,8 @@
-import sharp from 'sharp';
-import path from 'path';
-import fs from 'fs';
-
 import User, { IUser } from '../models/User';
 import AppError from '../errors/appError';
 
-import uploadConfig from '../config/upload';
+import { LocalStorageProvider } from '../providers/localStorageProvider';
+import { S3StorageProvider } from '../providers/s3StorageProvider';
 
 interface Request {
   userProviderId: string;
@@ -13,6 +10,20 @@ interface Request {
 }
 
 class UpdateUserAvatarService {
+  StorageProvider = {
+    LOCAL: LocalStorageProvider,
+    PRODUCTION: S3StorageProvider,
+  };
+
+  private provider: LocalStorageProvider | S3StorageProvider;
+
+  constructor() {
+    this.provider =
+      process.env.ENVIRONMENT === 'LOCAL'
+        ? new this.StorageProvider.LOCAL()
+        : new this.StorageProvider.PRODUCTION();
+  }
+
   public async execute({
     userProviderId,
     avatarFileName,
@@ -22,29 +33,10 @@ class UpdateUserAvatarService {
     if (!user) throw new AppError('can not change user avatar', 401);
 
     if (user.avatar) {
-      const userAvatarFilePath = path.join(uploadConfig.directory, user.avatar);
-
-      const userAvatarFileExists = fs.existsSync(userAvatarFilePath);
-
-      if (userAvatarFileExists) {
-        await fs.promises.unlink(userAvatarFilePath);
-      }
+      await this.provider.delete({ avatarFileName: user.avatar });
     }
 
-    const avatarPath = path.join(
-      __dirname,
-      '..',
-      '..',
-      `tmp/${avatarFileName}`,
-    );
-
-    const resizedFile = `resized-${avatarFileName}`;
-
-    await sharp(avatarPath)
-      .resize({ width: 640, height: 640 })
-      .toFile(path.join(__dirname, '..', '..', `tmp/${resizedFile}`));
-
-    await fs.promises.unlink(avatarPath);
+    const resizedFile = await this.provider.save({ avatarFileName });
 
     user.avatar = resizedFile;
     const savedUser = await user.save();
