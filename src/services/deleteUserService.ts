@@ -1,5 +1,6 @@
 import AppError from '../errors/appError';
 import User, { IUser } from '../models/User';
+import Evaluation from '../models/Evaluation';
 
 import { LocalStorageProvider } from '../providers/localStorageProvider';
 import { S3StorageProvider } from '../providers/s3StorageProvider';
@@ -27,6 +28,10 @@ class DeleteUserService {
     const foundUser = await User.findOneAndDelete({ userProviderId }).exec();
 
     if (!foundUser) throw new AppError('User does not exist');
+
+    await Evaluation.deleteMany().where('fromUserId').equals(foundUser).exec();
+
+    await Evaluation.deleteMany().where('toUserId').equals(foundUser).exec();
 
     if (foundUser.avatar) {
       await this.provider.delete({ avatarFileName: foundUser.avatar });
