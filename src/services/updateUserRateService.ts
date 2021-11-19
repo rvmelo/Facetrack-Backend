@@ -29,9 +29,7 @@ class UpdateUserRateService {
 
     const { total } = result[0] || {};
 
-    if (!total) return 0;
-
-    const rate = total / evaluationCount;
+    const rate = total ? total / evaluationCount : 0;
 
     user.rate = rate;
 
