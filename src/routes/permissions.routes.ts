@@ -15,7 +15,7 @@ permissionRoutes.post('/', ensureAuthenticated, async (req, res) => {
     notificationToken,
   });
 
-  return res.status(200);
+  return res.status(200).json({});
 });
 
 export default permissionRoutes;

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
 
 import RateUserService from '../services/rateUserService';
-// import SendRateNotificationService from '../services/sendRateNotificationService';
+import SendRateNotificationService from '../services/sendRateNotificationService';
 import FindEvaluationsService from '../services/findEvaluationsService';
 import UpdateEvaluationService from '../services/updateEvaluationService';
 
@@ -10,7 +10,7 @@ const evaluationRoutes = Router();
 
 evaluationRoutes.post('/', ensureAuthenticated, async (req, res) => {
   const rateUserService = new RateUserService();
-  // const sendRateNotificationService = new SendRateNotificationService();
+  const sendRateNotificationService = new SendRateNotificationService();
 
   const { toUserId, value, message } = req.body;
 
@@ -21,11 +21,11 @@ evaluationRoutes.post('/', ensureAuthenticated, async (req, res) => {
     value,
   });
 
-  // await sendRateNotificationService.execute({
-  //   fromUserProviderId: req.user.id,
-  //   toUserProviderId: typeof toUserId === 'string' ? toUserId : '',
-  //   value,
-  // });
+  await sendRateNotificationService.execute({
+    fromUserProviderId: req.user.id,
+    toUserProviderId: typeof toUserId === 'string' ? toUserId : '',
+    value,
+  });
 
   return res.status(200).json({});
 });
