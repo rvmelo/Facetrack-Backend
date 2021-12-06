@@ -93,7 +93,7 @@ passport.use(
 const sessionRoutes = Router();
 
 sessionRoutes.get('/auth/success', (req, res) => {
-  res.json(userData);
+  return res.json(userData);
 });
 
 sessionRoutes.get('/auth/facebook', passport.authenticate('facebook'));
@@ -120,7 +120,7 @@ sessionRoutes.get(
 sessionRoutes.get('/auth/instagram/callback', async (req, res) => {
   const { code } = req.query;
 
-  res.redirect(`${process.env.EXPO_CLIENT_URL}?code=${code}`);
+  return res.redirect(`${process.env.EXPO_CLIENT_URL}?code=${code}`);
 });
 
 sessionRoutes.get('/auth/instagram/profile', async (req, res) => {
@@ -132,7 +132,7 @@ sessionRoutes.get('/auth/instagram/profile', async (req, res) => {
     authCode: typeof code === 'string' ? code : '',
   });
 
-  res.status(200).json(instagramData);
+  return res.status(200).json(instagramData);
 });
 
 export default sessionRoutes;
