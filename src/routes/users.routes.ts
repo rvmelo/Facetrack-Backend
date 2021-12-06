@@ -63,9 +63,9 @@ userRoutes.get('/instagram', ensureAuthenticated, async (req, res) => {
   const { token } = req.query;
   // const { token } = req.headers.authorization;
 
-  const refreshUserInstagramToken = new RefreshUserInstagramDataService();
+  const refreshUserInstagramDataService = new RefreshUserInstagramDataService();
 
-  const instagramData = await refreshUserInstagramToken.execute({
+  const instagramData = await refreshUserInstagramDataService.execute({
     userProviderId: req.user.id,
     token: typeof token === 'string' ? token : '',
   });
