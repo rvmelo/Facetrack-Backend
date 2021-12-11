@@ -35,7 +35,11 @@ class CreateNotificationTokenService {
       userProviderId,
     }).exec();
 
-    if (foundPermission) return;
+    if (foundPermission) {
+      foundPermission.notificationToken = notificationToken;
+      await foundPermission.save();
+      return;
+    }
 
     const createdPermission = new UserPermissions({
       userProviderId,
