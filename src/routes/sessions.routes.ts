@@ -1,99 +1,34 @@
 import { Router } from 'express';
 
 import passport from 'passport';
-import { Strategy as FacebookStrategy } from 'passport-facebook';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { handlePassportConfig } from '../config/passportConfig';
 
-import { IUser } from '../models/User';
-
-import FindUserService from '../services/findUserService';
-import GenerateUserToken from '../services/generateUserToken';
 import GetUserInstagramDataService from '../services/getUserInstagramDataService';
 
-interface RegisteredUser {
-  registeredUser: IUser;
-  token: string;
-}
-
 interface NotRegisteredUser {
-  notRegisteredUser: {
-    userProviderId: string;
-    name: string;
-  };
-  token: string;
+  userProviderId: string;
+  name: string;
 }
 
-type AuthData = RegisteredUser | NotRegisteredUser;
-
-let userData = {} as AuthData;
-
-passport.use(
-  new FacebookStrategy(
-    {
-      clientID: process.env.FACEBOOK_CLIENT_ID || '',
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
-      callbackURL: `${process.env.BASE_URL}/sessions/auth/facebook/callback`,
-    },
-
-    async (accessToken, refreshToken, profile, done) => {
-      const findUserService = new FindUserService();
-      const generateUserToken = new GenerateUserToken();
-
-      const { id, displayName } = profile;
-
-      const token = await generateUserToken.execute({ userProviderId: id });
-
-      const foundUser = await findUserService.execute({
-        userProviderId: id,
-      });
-
-      userData = foundUser
-        ? { registeredUser: foundUser, token }
-        : {
-            notRegisteredUser: { userProviderId: id, name: displayName },
-            token,
-          };
-
-      return done(null, profile);
-    },
-  ),
-);
-
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      callbackURL: `${process.env.BASE_URL}/sessions/auth/google/callback`,
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      const findUserService = new FindUserService();
-      const generateUserToken = new GenerateUserToken();
-
-      const { id, displayName } = profile;
-
-      const token = await generateUserToken.execute({ userProviderId: id });
-
-      const foundUser = await findUserService.execute({
-        userProviderId: id,
-      });
-
-      userData = foundUser
-        ? { registeredUser: foundUser, token }
-        : {
-            notRegisteredUser: { userProviderId: id, name: displayName },
-            token,
-          };
-
-      return done(null, profile);
-    },
-  ),
-);
+type AuthData = {
+  notRegisteredUser?: NotRegisteredUser;
+  token: string;
+};
 
 const sessionRoutes = Router();
 
+sessionRoutes.use(passport.initialize());
+sessionRoutes.use(passport.session());
+handlePassportConfig(passport);
+
 sessionRoutes.get('/auth/success', (req, res) => {
-  return res.json(userData);
+  const { notRegisteredUser, token } = (req?.user as AuthData) || {};
+
+  return res.redirect(
+    `${process.env.EXPO_CLIENT_URL}?notRegisteredUser=${JSON.stringify(
+      notRegisteredUser,
+    )}&token=${token}`,
+  );
 });
 
 sessionRoutes.get('/auth/facebook', passport.authenticate('facebook'));
@@ -101,7 +36,7 @@ sessionRoutes.get('/auth/facebook', passport.authenticate('facebook'));
 sessionRoutes.get(
   '/auth/facebook/callback',
   passport.authenticate('facebook', {
-    successRedirect: process.env.EXPO_CLIENT_URL,
+    successRedirect: `${process.env.BASE_URL}/sessions/auth/success`,
   }),
 );
 
@@ -113,7 +48,7 @@ sessionRoutes.get(
 sessionRoutes.get(
   '/auth/google/callback',
   passport.authenticate('google', {
-    successRedirect: process.env.EXPO_CLIENT_URL,
+    successRedirect: `${process.env.BASE_URL}/sessions/auth/success`,
   }),
 );
 

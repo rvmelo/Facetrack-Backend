@@ -5,8 +5,9 @@ import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { errors } from 'celebrate';
 import 'express-async-errors';
-import passport from 'passport';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
 
 import { rateLimiter } from './middlewares/rateLimiters';
 
@@ -16,19 +17,18 @@ import routes from './routes';
 
 import uploadConfig from './config/upload';
 
-passport.serializeUser((user, cb) => {
-  cb(null, user);
-});
-
-passport.deserializeUser(
-  (user: false | Express.User | null | undefined, cb) => {
-    cb(null, user);
-  },
-);
-
 const app = express();
 app.use(cors());
-app.use(passport.initialize());
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || '',
+    resave: true,
+    saveUninitialized: true,
+  }),
+);
+app.use(cookieParser(process.env.SESSION_SECRET));
+
 app.use(express.json());
 app.use('/files', express.static(uploadConfig.directory));
 

@@ -162,6 +162,15 @@ userRoutes.patch('/', ensureAuthenticated, async (req, res) => {
   return res.json(updatedUser);
 });
 
+userRoutes.get('/me', ensureAuthenticated, async (req, res) => {
+  const findUserService = new FindUserService();
+  const foundUser = await findUserService.execute({
+    userProviderId: req.user.id,
+  });
+
+  return res.status(200).json(foundUser);
+});
+
 userRoutes.get('/:userProviderId', ensureAuthenticated, async (req, res) => {
   const { userProviderId } = req.params;
 
