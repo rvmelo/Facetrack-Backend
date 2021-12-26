@@ -16,6 +16,7 @@ import UpdateUserRateService from '../services/updateUserRateService';
 
 import ensureSignUp from '../middlewares/ensureSignUp';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
+import { instagramRateLimiter } from '../middlewares/rateLimiters';
 
 import uploadConfig from '../config/upload';
 import UpdateUserAvatarService from '../services/updateUserAvatarService';
@@ -58,20 +59,26 @@ const userValidation = celebrate({
   },
 });
 
-userRoutes.get('/instagram', ensureAuthenticated, async (req, res) => {
-  //  only reading permissions for instagram
-  const { token } = req.query;
-  // const { token } = req.headers.authorization;
+userRoutes.get(
+  '/instagram',
+  ensureAuthenticated,
+  instagramRateLimiter,
+  async (req, res) => {
+    //  only reading permissions for instagram
+    const { token } = req.query;
+    // const { token } = req.headers.authorization;
 
-  const refreshUserInstagramDataService = new RefreshUserInstagramDataService();
+    const refreshUserInstagramDataService =
+      new RefreshUserInstagramDataService();
 
-  const instagramData = await refreshUserInstagramDataService.execute({
-    userProviderId: req.user.id,
-    token: typeof token === 'string' ? token : '',
-  });
+    const instagramData = await refreshUserInstagramDataService.execute({
+      userProviderId: req.user.id,
+      token: typeof token === 'string' ? token : '',
+    });
 
-  return res.status(200).json(instagramData);
-});
+    return res.status(200).json(instagramData);
+  },
+);
 
 userRoutes.patch(
   '/avatar',

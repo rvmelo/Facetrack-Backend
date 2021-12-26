@@ -12,7 +12,8 @@ class GenerateUserToken {
 
     const foundUser = await findUserService.execute({ userProviderId });
 
-    const { secret, secretForNonRegisteredUsers, expiresIn } = authConfig.jwt;
+    const { secret, secretForNonRegisteredUsers, expiresIn, signUpExpiresIn } =
+      authConfig.jwt;
 
     if (foundUser) {
       const token = sign({}, secret, {
@@ -25,7 +26,7 @@ class GenerateUserToken {
 
     const token = sign({}, secretForNonRegisteredUsers, {
       subject: userProviderId,
-      expiresIn,
+      expiresIn: signUpExpiresIn,
     });
 
     return token;

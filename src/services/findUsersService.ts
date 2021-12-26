@@ -9,7 +9,7 @@ class FindUsersService {
   public async execute({
     userProviderId,
   }: IRequest): Promise<IUser[] | undefined> {
-    const items_per_page = 2;
+    const items_per_page = 30;
 
     const count = await User.find({ userProviderId: { $ne: userProviderId } })
       .count()

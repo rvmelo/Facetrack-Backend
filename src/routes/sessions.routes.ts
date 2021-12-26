@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import passport from 'passport';
 import { handlePassportConfig } from '../config/passportConfig';
+import { instagramRateLimiter } from '../middlewares/rateLimiters';
 
 import GetUserInstagramDataService from '../services/getUserInstagramDataService';
 
@@ -51,6 +52,8 @@ sessionRoutes.get(
     successRedirect: `${process.env.BASE_URL}/sessions/auth/success`,
   }),
 );
+
+sessionRoutes.use('/auth/instagram', instagramRateLimiter);
 
 sessionRoutes.get('/auth/instagram/callback', async (req, res) => {
   const { code } = req.query;

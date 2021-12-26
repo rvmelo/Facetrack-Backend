@@ -40,6 +40,7 @@ async function sendPushNotification({
   if (!Expo.isExpoPushToken(expoPushToken)) {
     throw new AppError(
       `Push token ${expoPushToken} is not a valid Expo push token`,
+      500,
     );
   }
 
