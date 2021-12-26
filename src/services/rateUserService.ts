@@ -37,6 +37,10 @@ class RateUserService {
       throw new AppError('Invalid value');
     }
 
+    if (message && message.length > 280) {
+      throw new AppError('Message too long');
+    }
+
     const foundEvaluation = await Evaluation.findOne()
       .where('fromUserId')
       .equals(fromUser)
