@@ -9,12 +9,14 @@ interface IRequest {
   fromUserProviderId: string;
   toUserProviderId: string;
   value: number;
+  message: string;
 }
 
 interface PushNotificationProps {
   expoPushToken: string;
   userName: string;
   value: number;
+  message: string;
   fromUserProviderId: string;
   toUserProviderId: string;
 }
@@ -24,14 +26,15 @@ async function sendPushNotification({
   expoPushToken,
   userName,
   value,
+  message,
   fromUserProviderId,
   toUserProviderId,
 }: PushNotificationProps) {
-  const message: ExpoPushMessage = {
+  const notificationData: ExpoPushMessage = {
     to: expoPushToken,
     priority: 'high',
-    title: 'You have been rated!!',
-    body: `${userName} has rated you with ${value} stars!!`,
+    title: `${userName} has rated you with ${value} stars!!`,
+    body: `${message.substring(0, 35)}...`,
     data: { fromUserProviderId, toUserProviderId },
   };
 
@@ -44,7 +47,7 @@ async function sendPushNotification({
     );
   }
 
-  const tickets = await expo.sendPushNotificationsAsync([message]);
+  const tickets = await expo.sendPushNotificationsAsync([notificationData]);
 
   if (tickets[0].status === 'error') {
     const { message: errorMessage } = tickets[0] || {};
@@ -58,6 +61,7 @@ class SendRateNotificationService {
     toUserProviderId,
     fromUserProviderId,
     value,
+    message,
   }: IRequest): Promise<void> {
     const findUserService = new FindUserService();
 
@@ -88,6 +92,7 @@ class SendRateNotificationService {
     await sendPushNotification({
       userName: name,
       value,
+      message,
       expoPushToken: notificationToken,
       fromUserProviderId,
       toUserProviderId,

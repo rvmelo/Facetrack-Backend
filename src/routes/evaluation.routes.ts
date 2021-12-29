@@ -25,6 +25,7 @@ evaluationRoutes.post('/', ensureAuthenticated, async (req, res) => {
     fromUserProviderId: req.user.id,
     toUserProviderId: typeof toUserId === 'string' ? toUserId : '',
     value,
+    message,
   });
 
   return res.status(200).json({});
