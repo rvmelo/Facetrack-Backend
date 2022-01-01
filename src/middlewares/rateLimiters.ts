@@ -16,7 +16,7 @@ export const rateLimiter = rateLimit({
 
 export const instagramRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 10,
+  max: 80,
   keyGenerator(req: Request): string {
     return req.ip;
   },
