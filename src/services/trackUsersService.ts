@@ -53,6 +53,7 @@ class TrackUsersService {
       userProviderId: { $ne: userProviderId },
     })
       .skip((parseInt(page, 10) - 1) * items_per_page)
+      .limit(items_per_page)
       .exec();
 
     return users;
