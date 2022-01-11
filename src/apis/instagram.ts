@@ -1,5 +1,4 @@
 import axios from 'axios';
-import querystring from 'querystring';
 
 interface UserMedia {
   id: string;
@@ -8,13 +7,13 @@ interface UserMedia {
 }
 
 export const get_token = async (authCode: string): Promise<string> => {
-  const instagramAppData = querystring.stringify({
+  const instagramAppData = new URLSearchParams({
     client_id: process.env.INSTAGRAM_CLIENT_ID || '',
     client_secret: process.env.INSTAGRAM_CLIENT_SECRET || '',
     grant_type: 'authorization_code',
     redirect_uri: `${process.env.BASE_URL}/sessions/auth/instagram/callback`,
     code: authCode,
-  });
+  }).toString();
 
   try {
     const response = await axios.post(
@@ -23,8 +22,8 @@ export const get_token = async (authCode: string): Promise<string> => {
     );
 
     return response.data.access_token;
-  } catch (err) {
-    throw new Error(err);
+  } catch {
+    throw new Error();
   }
 };
 
@@ -37,8 +36,8 @@ export const get_long_lived_access_token = async (
     );
 
     return response.data.access_token;
-  } catch (err) {
-    throw new Error(err);
+  } catch {
+    throw new Error();
   }
 };
 
@@ -53,8 +52,8 @@ export const refresh_long_lived_token = async (
     );
 
     return response.data.access_token;
-  } catch (err) {
-    throw new Error(err);
+  } catch {
+    throw new Error();
   }
 };
 
@@ -65,8 +64,8 @@ export const get_username = async (userToken: string): Promise<string> => {
     );
 
     return response.data.username;
-  } catch (err) {
-    throw new Error(err);
+  } catch {
+    throw new Error();
   }
 };
 
@@ -79,7 +78,7 @@ export const get_user_media = async (
     );
 
     return [...response.data.data];
-  } catch (err) {
-    throw new Error(err);
+  } catch {
+    throw new Error();
   }
 };
