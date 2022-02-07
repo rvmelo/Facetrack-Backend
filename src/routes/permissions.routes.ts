@@ -6,13 +6,14 @@ import CreateNotificationTokenService from '../services/createNotificationTokenS
 const permissionRoutes = Router();
 
 permissionRoutes.post('/', ensureAuthenticated, async (req, res) => {
-  const { userProviderId, notificationToken } = req.body;
+  const { userProviderId, notificationToken, instagramToken } = req.body;
 
   const createNotificationTokenService = new CreateNotificationTokenService();
 
   await createNotificationTokenService.execute({
     userProviderId,
     notificationToken,
+    instagramToken,
   });
 
   return res.status(200).json({});

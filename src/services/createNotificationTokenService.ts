@@ -8,12 +8,14 @@ import FindUserService from './findUserService';
 interface IRequest {
   userProviderId: string;
   notificationToken: string;
+  instagramToken: string;
 }
 
 class CreateNotificationTokenService {
   public async execute({
     userProviderId,
     notificationToken,
+    instagramToken,
   }: IRequest): Promise<void> {
     const findUserService = new FindUserService();
 
@@ -37,6 +39,7 @@ class CreateNotificationTokenService {
 
     if (foundPermission) {
       foundPermission.notificationToken = notificationToken;
+      foundPermission.instagramToken = instagramToken;
       await foundPermission.save();
       return;
     }
@@ -44,6 +47,7 @@ class CreateNotificationTokenService {
     const createdPermission = new UserPermissions({
       userProviderId,
       notificationToken,
+      instagramToken,
     });
 
     await createdPermission.save();
