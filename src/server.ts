@@ -9,6 +9,8 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 
+import CronManager from './cron/manager-cron';
+
 import { rateLimiter } from './middlewares/rateLimiters';
 
 import AppError from './errors/appError';
@@ -53,8 +55,12 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 mongoose.connect(`${process.env.MONGODB_URL}?authSource=admin`, () => {
-  // eslint-disable-next-line no-console
-  app.listen(3333, () => console.log('server started at port 3333'));
+  app.listen(3333, () => {
+    // eslint-disable-next-line no-console
+    console.log('server started at port 3333');
+    const cronManager = new CronManager();
+    cronManager.run();
+  });
 });
 
 // eslint-disable-next-line no-console
