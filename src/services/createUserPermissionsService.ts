@@ -11,7 +11,7 @@ interface IRequest {
   instagramToken: string;
 }
 
-class CreateNotificationTokenService {
+class CreateUserPermissionsService {
   public async execute({
     userProviderId,
     notificationToken,
@@ -54,4 +54,4 @@ class CreateNotificationTokenService {
   }
 }
 
-export default CreateNotificationTokenService;
+export default CreateUserPermissionsService;

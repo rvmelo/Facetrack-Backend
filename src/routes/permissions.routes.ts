@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated';
 
-import CreateNotificationTokenService from '../services/createNotificationTokenService';
+import CreateUserPermissionsService from '../services/createUserPermissionsService';
 
 const permissionRoutes = Router();
 
 permissionRoutes.post('/', ensureAuthenticated, async (req, res) => {
   const { userProviderId, notificationToken, instagramToken } = req.body;
 
-  const createNotificationTokenService = new CreateNotificationTokenService();
+  const createUserPermissionsService = new CreateUserPermissionsService();
 
-  await createNotificationTokenService.execute({
+  await createUserPermissionsService.execute({
     userProviderId,
     notificationToken,
     instagramToken,
