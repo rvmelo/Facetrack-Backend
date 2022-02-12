@@ -17,7 +17,7 @@ export async function updateInstagram(): Promise<void> {
         userProviderId,
       }).exec();
 
-      if (!instagramToken) {
+      if (!instagramToken || !user) {
         continue;
       }
 
