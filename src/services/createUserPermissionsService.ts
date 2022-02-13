@@ -38,9 +38,16 @@ class CreateUserPermissionsService {
     }).exec();
 
     if (foundPermission) {
-      foundPermission.notificationToken = notificationToken;
-      foundPermission.instagramToken = instagramToken;
+      Object.assign(foundPermission, {
+        ...foundPermission,
+        notificationToken,
+        instagramToken: foundPermission.instagramToken
+          ? foundPermission.instagramToken
+          : instagramToken,
+      });
+
       await foundPermission.save();
+
       return;
     }
 
