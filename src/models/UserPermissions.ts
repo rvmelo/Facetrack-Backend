@@ -5,6 +5,7 @@ const { Schema, model } = mongoose;
 interface IUserPermission {
   userProviderId: string;
   notificationToken: string;
+  instagramToken: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -16,6 +17,10 @@ const userPermissionSchema = new Schema({
     required: true,
   },
   notificationToken: {
+    type: String,
+    required: true,
+  },
+  instagramToken: {
     type: String,
     required: true,
   },
