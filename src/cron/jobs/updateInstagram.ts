@@ -11,25 +11,40 @@ export async function updateInstagram(): Promise<void> {
 
   for (let i = 0; i < permissions.length; i++) {
     try {
+      console.log('iteration: ', i);
+
       const { instagramToken, userProviderId } = permissions[i] || {};
+
+      console.log('step 1');
 
       const user = await User.findOne({
         userProviderId,
       }).exec();
 
+      console.log('step 2');
+
       if (!instagramToken || !user) {
         continue;
       }
 
+      console.log('step 3');
+
       const instagramMedia = await get_user_media(instagramToken);
+
+      console.log('step 4');
 
       if (user?.instagram && user?.instagram?.userMedia) {
         Object.assign(user?.instagram?.userMedia, instagramMedia);
       }
 
+      console.log('step 5');
+
       await user?.save();
-    } catch {
+
+      console.log('step 6');
+    } catch (err) {
       // invalid instagram token
+      console.log('Failed to update instagram: ', err);
     }
   }
 }
